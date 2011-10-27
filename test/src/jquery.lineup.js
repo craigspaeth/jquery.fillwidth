@@ -15,13 +15,22 @@
     methods = {
       init: function() {
         return this.each(function() {
-          $(this).find('img').css({
-            'max-width': '100%',
-            'max-height': '100%',
-            display: 'block',
-            'height': 'auto'
-          });
+          methods.initialStyling($(this));
           return methods.lineUp($(this));
+        });
+      },
+      initialStyling: function($el) {
+        $el.css({
+          'list-style': 'none',
+          padding: 0,
+          margin: 0
+        });
+        $el.children('li').css({
+          float: 'left'
+        });
+        return $el.children('li').children('img').css({
+          display: 'block',
+          'max-width': '100%'
         });
       },
       rows: function() {
@@ -34,20 +43,36 @@
         return _results;
       },
       lineUp: function($el) {
-        var row, _i, _len, _results;
+        var li, row, _i, _j, _len, _len2, _results;
         frameWidth = $el.width();
         currentRows = methods.breakUpIntoRows.apply($el);
-        _results = [];
         for (_i = 0, _len = currentRows.length; _i < _len; _i++) {
           row = currentRows[_i];
-          methods.resizeRowHeight.apply($el, [row]);
-          if (methods.rowWidth(row) <= frameWidth) {
-            continue;
-          }
-          methods.resizeLandscapes.apply($el, [row]);
-          if (methods.rowWidth(row) <= frameWidth) {
-            continue;
-          }
+          methods.bruteForce(row);
+        }
+        _results = [];
+        for (_j = 0, _len2 = currentRows.length; _j < _len2; _j++) {
+          row = currentRows[_j];
+          _results.push((function() {
+            var _k, _len3, _results2;
+            _results2 = [];
+            for (_k = 0, _len3 = row.length; _k < _len3; _k++) {
+              li = row[_k];
+              li.updateEl();
+              _results2.push(console.log(li));
+            }
+            return _results2;
+          })());
+        }
+        return _results;
+      },
+      bruteForce: function(row) {
+        var li, newWidth, _i, _len, _results;
+        newWidth = Math.floor(frameWidth / row.length);
+        _results = [];
+        for (_i = 0, _len = row.length; _i < _len; _i++) {
+          li = row[_i];
+          _results.push(li.setWidth(newWidth));
         }
         return _results;
       },
@@ -57,8 +82,10 @@
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           ratio = _ref[_i];
           landscapes = _.select(row, function(li) {
-            var _ref2, _ref3;
-            return (((_ref3 = options.landscapeRatios[_i - 1]) != null ? _ref3 : 9999) >= (_ref2 = li.width / li.height) && _ref2 > ratio);
+            var a, b, _ref2;
+            a = (_ref2 = options.landscapeRatios[_i - 1]) != null ? _ref2 : 9999;
+            b = (li.width / li.height) > ratio;
+            return a >= b;
           });
           if (landscapes.length === 0) {
             continue;
@@ -132,6 +159,9 @@
             },
             updateHeight: function() {
               return this.el.height(this.height);
+            },
+            updateEl: function() {
+              return this.el.width = this.width;
             }
           });
           if (methods.rowWidth(rows[i]) > this.width()) {
@@ -148,18 +178,23 @@
         return rows;
       },
       rowWidth: function(row) {
-        return _.reduce(_.pluck(row, 'width'), (function(memo, num) {
-          return memo + num;
-        }), 0);
+        var li, widths, _i, _len, _results;
+        widths = 0;
+        _results = [];
+        for (_i = 0, _len = row.length; _i < _len; _i++) {
+          li = row[_i];
+          _results.push(widths += li.width);
+        }
+        return _results;
       }
     };
-    return $.fn.fillwidth = function(method) {
+    return $.fn.lineup = function(method) {
       if (methods[method] != null) {
-        return methods[method].apply(this, Array.prototype.slice.call(arguments, 1));
+        return methods[method].apply(this, arguments.slice(1, (arguments.length + 1) || 9e9));
       } else if (typeof method === "object" || !(method != null)) {
         return methods.init.apply(this, arguments);
       } else {
-        return $.error("Method " + method + " does not exist on jQuery.fillwidth");
+        return $.error("Method " + method + " does not exist on jQuery.lineup");
       }
     };
   })(jQuery);
