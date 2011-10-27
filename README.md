@@ -4,7 +4,7 @@
 
 A jQuery plugin that given a `ul` with images inside their `lis` will do some things to line them up so that everything fits inside their container nice and flush to the edges while retaining the integrity of the original images (no cropping or skewing).
 
-# Installation
+## Installation
 
 Simply copy and embed jquery.lineup.js into your project.
 
@@ -21,8 +21,9 @@ Simply copy and embed jquery.lineup.js into your project.
 
 Then simply run the cake command.
 
-    cake build
-
+````
+cake build
+````
 
 ## To run tests
 
