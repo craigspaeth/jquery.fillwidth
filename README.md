@@ -10,10 +10,10 @@ Simply copy and embed jquery.lineup.js into your project.
 
     <script type="text/javascript" src="jquery.lineup.js"></script>
   
-# Usage
+## Usage
 
 
-# To build
+## To build
 
 * Install [node](https://github.com/joyent/node/wiki/Installation)
 * Install [npm](http://npmjs.org/) `curl http://npmjs.org/install.sh | sh`
@@ -22,7 +22,8 @@ Simply copy and embed jquery.lineup.js into your project.
 Then simply run the cake command.
 
     cake build
-  
+
+
 ## To run tests
 
 Open up `test/SpecRunner.html` in a browser
