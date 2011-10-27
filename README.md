@@ -24,3 +24,5 @@ Then simply run the cake command.
     cake build
   
 ## To run tests
+
+Open up `test/SpecRunner.html` in a browser
