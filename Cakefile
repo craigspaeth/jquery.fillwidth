@@ -15,3 +15,7 @@ task 'watch', 'watch for file changes in jquery.fillwidth.coffee and build', ->
   sentry.watch 'jquery.fillwidth.coffee', ->
     build()
     console.log 'compiled'
+  
+  sentry.watch __dirname + '/test/spec/jquery.fillwidth_spec.coffee', ->
+    build()
+    console.log 'compiled'
