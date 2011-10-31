@@ -1,4 +1,4 @@
-# jquery.lineup
+# jquery.fillwidth
 
 **THIS IS CURRENTLY A WORK IN PROGRESS**
 
@@ -6,9 +6,9 @@ A jQuery plugin that given a `ul` with images inside their `lis` will do some th
 
 ## Installation
 
-Simply copy and embed jquery.lineup.js into your project.
+Simply copy and embed jquery.fillwidth.js into your project.
 
-    <script type="text/javascript" src="jquery.lineup.js"></script>
+    <script type="text/javascript" src="jquery.fillwidth.js"></script>
   
 ## Usage
 

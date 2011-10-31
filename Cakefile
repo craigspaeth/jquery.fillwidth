@@ -3,15 +3,15 @@ sentry = require 'sentry'
 fs = require 'fs'
 
 build = ->
-  fs.readFile 'jquery.lineup.coffee', (err, data) ->
-    fs.writeFile 'jquery.lineup.js', coffee.compile data.toString()
-    fs.writeFile 'test/src/jquery.lineup.js', coffee.compile data.toString()
-    fs.writeFile 'example/src/jquery.lineup.js', coffee.compile data.toString()
-  fs.readFile 'test/spec/jquery.lineup_spec.coffee', (err, data) ->
-    fs.writeFile 'test/spec/jquery.lineup_spec.js', coffee.compile data.toString()
+  fs.readFile 'jquery.fillwidth.coffee', (err, data) ->
+    fs.writeFile 'jquery.fillwidth.js', coffee.compile data.toString()
+    fs.writeFile 'test/src/jquery.fillwidth.js', coffee.compile data.toString()
+    fs.writeFile 'example/src/jquery.fillwidth.js', coffee.compile data.toString()
+  fs.readFile 'test/spec/jquery.fillwidth_spec.coffee', (err, data) ->
+    fs.writeFile 'test/spec/jquery.fillwidth_spec.js', coffee.compile data.toString()
 
 task 'build', 'generate the js for test and in root', build
-task 'watch', 'watch for file changes in jquery.lineup.coffee and build', ->
-  sentry.watch 'jquery.lineup.coffee', ->
+task 'watch', 'watch for file changes in jquery.fillwidth.coffee and build', ->
+  sentry.watch 'jquery.fillwidth.coffee', ->
     build()
     console.log 'compiled'
