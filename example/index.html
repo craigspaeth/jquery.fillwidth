@@ -7,7 +7,13 @@
   <script type="text/javascript" src="src/jquery.fillwidth.js"></script>
   <script>
     $(function(){
-      $('ul').fillwidth();
+      var $clone, html ='';
+      for(var i = 0; i < 20; i++) {
+        html += '<ul>' + $('ul').first().html() + '</ul'
+      }
+      $('body').append(html);
+      $('ul').first().remove()
+      $('ul').fillwidth()
     });
   </script>
   <style>
@@ -16,7 +22,7 @@
       overflow: hidden;
     }
     li {
-      margin: 15px 15px 0 0;
+      margin: 50px 15px 0 0;
     }
   </style
 </head>

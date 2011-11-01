@@ -108,7 +108,7 @@
           methods.lineUp.apply @
           $(@).width $(@).width()
       
-      $(window).resize debounce lineup, 500
+      $(window).resize debounce lineup, 250
       lineup()
       
     # Initial styling applied to the element to get lis to line up horizontally and images to be 

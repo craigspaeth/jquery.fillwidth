@@ -124,7 +124,7 @@
             return $(this).width($(this).width());
           });
         }, this);
-        $(window).resize(debounce(lineup, 500));
+        $(window).resize(debounce(lineup, 250));
         return lineup();
       },
       initialStyling: function() {
