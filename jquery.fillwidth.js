@@ -1,6 +1,7 @@
 (function() {
+  var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
   (function($) {
-    var Li, Row, currentRows, frameWidth, methods, options, _defaults;
+    var Li, Row, currentRows, debounce, frameWidth, methods, options, _defaults;
     _defaults = {
       callback: null,
       resizeLandscapesBy: 95,
@@ -11,9 +12,10 @@
     currentRows = [];
     Li = (function() {
       function Li(el) {
-        this.width = $(el).outerWidth(true);
-        this.height = $(el).outerHeight(true);
-        this.margin = $(el).outerWidth(true) - $(el).outerWidth();
+        this.originalWidth = this.width = $(el).outerWidth();
+        this.originalHeight = this.height = $(el).outerHeight(true);
+        this.originalMargin = this.margin = $(el).outerWidth(true) - $(el).outerWidth();
+        this.imageHeight = $(el).children('img').height();
         this.$el = $(el);
       }
       Li.prototype.setHeight = function(h) {
@@ -39,6 +41,16 @@
       Li.prototype.updateDOM = function() {
         this.$el.width(this.width);
         return this.$el.height(this.height);
+      };
+      Li.prototype.reset = function() {
+        this.width = this.originalWidth;
+        this.height = this.originalHeight;
+        this.margin = this.originalMargin;
+        return this.$el.css({
+          "margin-right": this.originalMargin,
+          height: 'auto',
+          width: 'auto'
+        });
       };
       return Li;
     })();
@@ -70,14 +82,50 @@
         }
         return _results;
       };
+      Row.prototype.reset = function() {
+        var li, _i, _len, _ref, _results;
+        _ref = this.lis;
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          li = _ref[_i];
+          _results.push(li.reset());
+        }
+        return _results;
+      };
       return Row;
     })();
+    debounce = function(func, wait) {
+      var timeout;
+      timeout = 0;
+      return function() {
+        var args, throttler;
+        args = arguments;
+        throttler = __bind(function() {
+          timeout = null;
+          return func(args);
+        }, this);
+        clearTimeout(timeout);
+        return timeout = setTimeout(throttler, wait);
+      };
+    };
     methods = {
       init: function() {
-        return this.each(function() {
-          methods.initialStyling.apply(this);
-          return methods.lineUp.apply(this);
-        });
+        var lineup;
+        methods.initialStyling.apply(this);
+        lineup = __bind(function() {
+          var row, _i, _len;
+          for (_i = 0, _len = currentRows.length; _i < _len; _i++) {
+            row = currentRows[_i];
+            row.reset();
+          }
+          return this.each(function() {
+            $(this).width('auto');
+            methods.lineUp.apply(this);
+            return $(this).width($(this).width());
+          });
+        }, this);
+        $(window).resize(debounce(lineup, 500));
+        return lineup();
       },
       initialStyling: function() {
         $(this).css({
@@ -85,19 +133,20 @@
           padding: 0,
           margin: 0
         });
+        $(this).append("<div class='fillwidth-clearfix' style='clear:both'></div>");
         $(this).children('li').css({
           float: 'left'
         });
         return $(this).children('li').children('img').css({
           display: 'block',
-          'max-width': '100%'
+          'max-width': '100%',
+          'max-height': '100%'
         });
       },
       lineUp: function() {
-        var row, _i, _len, _results;
+        var row, _i, _len;
         frameWidth = $(this).width();
         currentRows = methods.breakUpIntoRows.apply(this);
-        _results = [];
         for (_i = 0, _len = currentRows.length; _i < _len; _i++) {
           row = currentRows[_i];
           methods.removeMargin(row);
@@ -105,7 +154,31 @@
           methods.fillLeftoverPixels(row);
           methods.considerMargins(row);
           methods.setRowHeight(row);
-          _results.push(row.updateDOM());
+          row.updateDOM();
+        }
+        return setTimeout((function() {
+          return methods.firefoxScrollbarBug.apply(this);
+        }), 1);
+      },
+      firefoxScrollbarBug: function() {
+        var $lastLi, diff, i, index, randomRow, row, _i, _len, _ref, _results;
+        _ref = currentRows.slice(0, (currentRows.length - 2 + 1) || 9e9);
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          row = _ref[_i];
+          $lastLi = row.lis[row.lis.length - 1].$el;
+          diff = $(this).width() - ($lastLi.outerWidth(true) + $lastLi.position().left);
+          _results.push((function() {
+            if ($.browser.mozilla && diff === 24) {
+              for (i = 1; i <= 15; i++) {
+                index = Math.round(Math.random() * (row.lis.length - 1));
+                randomRow = row.lis[index];
+                randomRow.incWidth();
+              }
+              methods.setRowHeight(row);
+              return row.updateDOM();
+            }
+          })());
         }
         return _results;
       },
@@ -137,9 +210,9 @@
           return _results;
         })();
         sortedLis = unsortedLis.sort(function(a, b) {
-          return b.height - a.height;
+          return b.imageHeight - a.imageHeight;
         });
-        height = sortedLis[0].height;
+        height = sortedLis[0].imageHeight;
         _results = [];
         for (_i = 0, _len = sortedLis.length; _i < _len; _i++) {
           li = sortedLis[_i];
@@ -160,7 +233,7 @@
       removeMargin: function(row) {
         var lastLi;
         lastLi = row.lis[row.lis.length - 1];
-        lastLi.width -= 10;
+        lastLi.width -= lastLi.margin;
         lastLi.margin = 0;
         return lastLi.$el.css({
           "margin-right": 0
@@ -207,9 +280,15 @@
         return row;
       },
       fillLeftoverPixels: function(row) {
-        var index, randomRow, _results;
+        var diff, index, randomRow, _results;
+        diff = function() {
+          return frameWidth - row.width();
+        };
+        if (diff() > 20) {
+          return;
+        }
         _results = [];
-        while (frameWidth - row.width() > 0) {
+        while (diff() > 0) {
           index = Math.round(Math.random() * (row.lis.length - 1));
           randomRow = row.lis[index];
           _results.push(randomRow.incWidth());

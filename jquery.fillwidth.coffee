@@ -29,9 +29,10 @@
   class Li
     
     constructor: (el) ->
-      @width = $(el).outerWidth(true)
-      @height = $(el).outerHeight(true)
-      @margin = $(el).outerWidth(true) - $(el).outerWidth()
+      @originalWidth = @width = $(el).outerWidth()
+      @originalHeight = @height = $(el).outerHeight(true)
+      @originalMargin = @margin = $(el).outerWidth(true) - $(el).outerWidth()
+      @imageHeight = $(el).children('img').height()
       @$el = $(el)
       
     setHeight: (h) ->
@@ -53,7 +54,16 @@
     updateDOM: ->
       @$el.width @width
       @$el.height @height
-    
+      
+    reset: ->
+      @width = @originalWidth
+      @height = @originalHeight
+      @margin = @originalMargin
+      @$el.css 
+        "margin-right": @originalMargin
+        height: 'auto'
+        width: 'auto'
+      
   class Row
     
     constructor: (@lis) ->
@@ -66,6 +76,23 @@
       
     updateDOM: ->
       li.updateDOM() for li in @lis
+      
+    # Resets the styling of the lis to be able to run calculations on a clean slate
+    reset: ->
+      li.reset() for li in @lis
+      
+  # Debounce stolen from underscore.js
+  # ----------------------------------
+  debounce = (func, wait) ->
+    timeout = 0
+    return ->
+      args = arguments
+      throttler = =>
+        timeout = null
+        func args
+
+      clearTimeout timeout
+      timeout = setTimeout(throttler, wait)
   
   # Methods
   # -------
@@ -73,10 +100,17 @@
     
     # Called on initialization of the plugin
     init: ->
-      @each ->
-        methods.initialStyling.apply @
-        methods.lineUp.apply @
-    
+      methods.initialStyling.apply @
+      lineup = =>
+        row.reset() for row in currentRows
+        @each ->
+          $(@).width 'auto'
+          methods.lineUp.apply @
+          $(@).width $(@).width()
+      
+      $(window).resize debounce lineup, 500
+      lineup()
+      
     # Initial styling applied to the element to get lis to line up horizontally and images to be 
     # contained well in them.
     initialStyling: ->
@@ -84,10 +118,12 @@
         'list-style': 'none'
         padding: 0
         margin: 0
+      $(@).append "<div class='fillwidth-clearfix' style='clear:both'></div>"
       $(@).children('li').css float: 'left'
       $(@).children('li').children('img').css
         display: 'block'
         'max-width': '100%'
+        'max-height': '100%'
     
     # Combines all of the magic and lines the lis up
     lineUp: ->
@@ -103,6 +139,21 @@
         methods.setRowHeight row
         row.updateDOM()
       
+      setTimeout (-> methods.firefoxScrollbarBug.apply @), 1
+    
+    # Firefox work-around for ghost scrollbar bug
+    firefoxScrollbarBug: ->
+      for row in currentRows[0..currentRows.length - 2]
+        $lastLi = row.lis[row.lis.length - 1].$el
+        diff = $(@).width() - ($lastLi.outerWidth(true) + $lastLi.position().left)
+        if $.browser.mozilla and diff is 24
+          for i in [1..15]
+            index = Math.round Math.random() * (row.lis.length - 1)
+            randomRow = row.lis[index]
+            randomRow.incWidth()
+          methods.setRowHeight row
+          row.updateDOM()
+     
     # Determine which set of lis go over the edge of the container, and store their 
     # { width, height, el, etc.. } in an array. Storing the width and height in objects helps run 
     # calculations without waiting for render reflows.
@@ -119,18 +170,19 @@
     # Makes sure all of the lis are the same height (the tallest list item in the row)
     setRowHeight: (row) ->
       unsortedLis = (li for li in row.lis)
-      sortedLis = unsortedLis.sort (a, b) -> b.height - a.height
-      height = sortedLis[0].height
+      sortedLis = unsortedLis.sort (a, b) -> b.imageHeight - a.imageHeight
+      height = sortedLis[0].imageHeight
       li.height = height for li in sortedLis
     
     # Reduces the row so that it fits with margins
     considerMargins: (row) ->
-      li.setWidth li.width - li.margin for li in row.lis
+      for li in row.lis
+        li.setWidth(li.width - li.margin)
     
     # Removes the right margin from the last row element
     removeMargin: (row) ->
       lastLi = row.lis[row.lis.length - 1]
-      lastLi.width -= 10
+      lastLi.width -= lastLi.margin
       lastLi.margin = 0
       lastLi.$el.css "margin-right": 0
     
@@ -155,9 +207,11 @@
       
     # Arbitrarily extend lis in a row to fill in any pixels that got rounded off
     fillLeftoverPixels: (row) ->
+      diff = -> frameWidth - row.width()
+      return if diff() > 20
       
       # Randomly pick any lis and extend them to fit the row width
-      while frameWidth - row.width() > 0
+      while diff() > 0
         index = Math.round Math.random() * (row.lis.length - 1)
         randomRow = row.lis[index]
         randomRow.incWidth()
