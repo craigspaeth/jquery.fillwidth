@@ -29,17 +29,17 @@
   class Li
     
     constructor: (el) ->
-      @width = $(el).outerWidth(true)
+      @width = $(el).outerWidth()
       @height = $(el).outerHeight(true)
+      @margin = $(el).outerWidth(true) - $(el).outerWidth()
       @$el = $(el)
-      @margin = $(el).outerWidth(true) - $(el).outerWidth(false)
       
     setHeight: (h) ->
-      @width = Math.ceil(h * (@width / @height))
+      @width = Math.floor(h * (@width / @height))
       @height = h
     
     setWidth: (w) ->
-      @height = Math.ceil(w * (@height / @width))
+      @height = Math.floor(w * (@height / @width))
       @width = w
       
     decWidth: ->
@@ -99,6 +99,7 @@
       
       for row in currentRows
         methods.setRowHeight row
+        methods.considerMargins row
         row.updateDOM()
       
     # Determine which set of lis go over the edge of the container, and store their 
@@ -114,21 +115,26 @@
           i++
       rows
     
-    # Makes sure all of the lis are the same height (the tallest list item)
+    # Makes sure all of the lis are the same height (the tallest list item in the row)
     setRowHeight: (row) ->
       unsortedLis = (li for li in row.lis)
       sortedLis = unsortedLis.sort (a, b) -> b.height - a.height
       height = sortedLis[0].height
       li.height = height for li in sortedLis
+    
+    # Reduces the row so that it fits with margins
+    considerMargins: (row) ->
+      li.setWidth li.width - li.margin for li in row.lis
       
+    
     # Removes the right margin from the last row element
     removeMargin: (row) ->
-      row.lis[row.lis.length - 1].$el.css "margin-right": 0
+      lastLi = row.lis[row.lis.length - 1]
+      lastLi.margin = 0
+      lastLi.$el.css "margin-right": 0
     
     # Resize the landscape's width to fit the frame
     resizeLandscapes: (row) ->
-      
-      console.log (li.$el for li in row.lis)
       
       # Determine our landscapes
       for i, ratio of options.landscapeRatios
@@ -145,7 +151,6 @@
       
       li.updateWidth() for li in row
       row
-      
           
   # Either call a method if passed a string, or call init if passed an object
   $.fn.fillwidth = (method) ->

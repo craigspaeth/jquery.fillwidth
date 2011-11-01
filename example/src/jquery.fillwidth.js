@@ -11,17 +11,17 @@
     currentRows = [];
     Li = (function() {
       function Li(el) {
-        this.width = $(el).outerWidth(true);
+        this.width = $(el).outerWidth();
         this.height = $(el).outerHeight(true);
+        this.margin = $(el).outerWidth(true) - $(el).outerWidth();
         this.$el = $(el);
-        this.margin = $(el).outerWidth(true) - $(el).outerWidth(false);
       }
       Li.prototype.setHeight = function(h) {
-        this.width = Math.ceil(h * (this.width / this.height));
+        this.width = Math.floor(h * (this.width / this.height));
         return this.height = h;
       };
       Li.prototype.setWidth = function(w) {
-        this.height = Math.ceil(w * (this.height / this.width));
+        this.height = Math.floor(w * (this.height / this.width));
         return this.width = w;
       };
       Li.prototype.decWidth = function() {
@@ -100,6 +100,7 @@
         for (_j = 0, _len2 = currentRows.length; _j < _len2; _j++) {
           row = currentRows[_j];
           methods.setRowHeight(row);
+          methods.considerMargins(row);
           _results.push(row.updateDOM());
         }
         return _results;
@@ -142,23 +143,26 @@
         }
         return _results;
       },
+      considerMargins: function(row) {
+        var li, _i, _len, _ref, _results;
+        _ref = row.lis;
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          li = _ref[_i];
+          _results.push(li.setWidth(li.width - li.margin));
+        }
+        return _results;
+      },
       removeMargin: function(row) {
-        return row.lis[row.lis.length - 1].$el.css({
+        var lastLi;
+        lastLi = row.lis[row.lis.length - 1];
+        lastLi.margin = 0;
+        return lastLi.$el.css({
           "margin-right": 0
         });
       },
       resizeLandscapes: function(row) {
         var i, landscapes, li, ratio, _i, _j, _len, _len2, _ref, _ref2;
-        console.log((function() {
-          var _i, _len, _ref, _results;
-          _ref = row.lis;
-          _results = [];
-          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-            li = _ref[_i];
-            _results.push(li.$el);
-          }
-          return _results;
-        })());
         _ref = options.landscapeRatios;
         for (i in _ref) {
           ratio = _ref[i];
