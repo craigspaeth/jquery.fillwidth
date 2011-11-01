@@ -50,8 +50,11 @@
     describe('considerMargins', function() {
       return xit('reduces the entire row by the sum of its margins', function() {});
     });
-    return describe('removeMargin', function() {
+    describe('removeMargin', function() {
       return xit('sets the last list items margin to 0', function() {});
+    });
+    return describe('fillLeftoverPixels', function() {
+      return xit('extends lis until they fill the remaining pixels', function() {});
     });
   });
 }).call(this);

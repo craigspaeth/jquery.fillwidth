@@ -63,3 +63,7 @@ describe "jQuery.fillwidth", ->
   describe 'removeMargin', ->
     
     xit 'sets the last list items margin to 0', ->
+      
+  describe 'fillLeftoverPixels', ->
+    
+    xit 'extends lis until they fill the remaining pixels', ->

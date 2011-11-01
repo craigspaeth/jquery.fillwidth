@@ -11,17 +11,17 @@
     currentRows = [];
     Li = (function() {
       function Li(el) {
-        this.width = $(el).outerWidth();
+        this.width = $(el).outerWidth(true);
         this.height = $(el).outerHeight(true);
         this.margin = $(el).outerWidth(true) - $(el).outerWidth();
         this.$el = $(el);
       }
       Li.prototype.setHeight = function(h) {
-        this.width = Math.floor(h * (this.width / this.height));
+        this.width = Math.ceil(h * (this.width / this.height));
         return this.height = h;
       };
       Li.prototype.setWidth = function(w) {
-        this.height = Math.floor(w * (this.height / this.width));
+        this.height = Math.ceil(w * (this.height / this.width));
         return this.width = w;
       };
       Li.prototype.decWidth = function() {
@@ -29,6 +29,12 @@
       };
       Li.prototype.decHeight = function() {
         return this.setHeight(this.height - 1);
+      };
+      Li.prototype.incWidth = function() {
+        return this.setWidth(this.width + 1);
+      };
+      Li.prototype.incHeight = function() {
+        return this.setHeight(this.height + 1);
       };
       Li.prototype.updateDOM = function() {
         this.$el.width(this.width);
@@ -88,17 +94,15 @@
         });
       },
       lineUp: function() {
-        var row, _i, _j, _len, _len2, _results;
+        var row, _i, _len, _results;
         frameWidth = $(this).width();
         currentRows = methods.breakUpIntoRows.apply(this);
+        _results = [];
         for (_i = 0, _len = currentRows.length; _i < _len; _i++) {
           row = currentRows[_i];
           methods.removeMargin(row);
           methods.resizeLandscapes(row);
-        }
-        _results = [];
-        for (_j = 0, _len2 = currentRows.length; _j < _len2; _j++) {
-          row = currentRows[_j];
+          methods.fillLeftoverPixels(row);
           methods.considerMargins(row);
           methods.setRowHeight(row);
           _results.push(row.updateDOM());
@@ -156,6 +160,7 @@
       removeMargin: function(row) {
         var lastLi;
         lastLi = row.lis[row.lis.length - 1];
+        lastLi.width -= 10;
         lastLi.margin = 0;
         return lastLi.$el.css({
           "margin-right": 0
@@ -200,6 +205,16 @@
           li.updateWidth();
         }
         return row;
+      },
+      fillLeftoverPixels: function(row) {
+        var index, randomRow, _results;
+        _results = [];
+        while (frameWidth - row.width() > 0) {
+          index = Math.round(Math.random() * (row.lis.length - 1));
+          randomRow = row.lis[index];
+          _results.push(randomRow.incWidth());
+        }
+        return _results;
       }
     };
     return $.fn.fillwidth = function(method) {

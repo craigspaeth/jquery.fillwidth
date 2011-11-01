@@ -29,25 +29,27 @@
   class Li
     
     constructor: (el) ->
-      @width = $(el).outerWidth()
+      @width = $(el).outerWidth(true)
       @height = $(el).outerHeight(true)
       @margin = $(el).outerWidth(true) - $(el).outerWidth()
       @$el = $(el)
       
     setHeight: (h) ->
-      @width = Math.floor(h * (@width / @height))
+      @width = Math.ceil(h * (@width / @height))
       @height = h
     
     setWidth: (w) ->
-      @height = Math.floor(w * (@height / @width))
+      @height = Math.ceil(w * (@height / @width))
       @width = w
       
-    decWidth: ->
-      @setWidth @width - 1
+    decWidth: -> @setWidth @width - 1
+    
+    decHeight: -> @setHeight @height - 1
+    
+    incWidth: -> @setWidth @width + 1
       
-    decHeight: ->
-      @setHeight @height - 1
-      
+    incHeight: -> @setHeight @height + 1
+    
     updateDOM: ->
       @$el.width @width
       @$el.height @height
@@ -96,8 +98,7 @@
       for row in currentRows
         methods.removeMargin row
         methods.resizeLandscapes row
-      
-      for row in currentRows
+        methods.fillLeftoverPixels row
         methods.considerMargins row
         methods.setRowHeight row
         row.updateDOM()
@@ -129,6 +130,7 @@
     # Removes the right margin from the last row element
     removeMargin: (row) ->
       lastLi = row.lis[row.lis.length - 1]
+      lastLi.width -= 10
       lastLi.margin = 0
       lastLi.$el.css "margin-right": 0
     
@@ -150,6 +152,15 @@
       
       li.updateWidth() for li in row
       row
+      
+    # Arbitrarily extend lis in a row to fill in any pixels that got rounded off
+    fillLeftoverPixels: (row) ->
+      
+      # Randomly pick any lis and extend them to fit the row width
+      while frameWidth - row.width() > 0
+        index = Math.round Math.random() * (row.lis.length - 1)
+        randomRow = row.lis[index]
+        randomRow.incWidth()
           
   # Either call a method if passed a string, or call init if passed an object
   $.fn.fillwidth = (method) ->
