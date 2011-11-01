@@ -6,14 +6,17 @@
   <script type="text/javascript" src="src/jquery.min.js"></script>
   <script type="text/javascript" src="src/jquery.fillwidth.js"></script>
   <script>
-    $(function(){
-      var $clone, html ='';
-      for(var i = 0; i < 20; i++) {
-        html += '<ul>' + $('ul').first().html() + '</ul'
-      }
-      $('body').append(html);
-      $('ul').first().remove()
-      $('ul').fillwidth()
+    // $(function(){
+    //   var $clone, html ='';
+    //   for(var i = 0; i < 2; i++) {
+    //     html += '<ul>' + $('ul').first().html() + '</ul'
+    //   }
+    //   $('body').append(html);
+    //   $('ul').first().remove()
+    //   $('ul').fillwidth()
+    // });
+    $(function() {
+      $('ul').fillwidth();
     });
   </script>
   <style>
@@ -37,6 +40,16 @@
     <li><img src='kittens/6.jpeg'></li>
     <li><img src='kittens/7.jpeg'></li>
     <li><img src='kittens/8.jpeg'></li>
+  </ul>
+  <ul id='no_landscapes'>
+    <li><img src='no_landscape_kittens/1.jpg'></li>
+    <li><img src='no_landscape_kittens/2.jpg'></li>
+    <li><img src='no_landscape_kittens/3.jpg'></li>
+    <li><img src='no_landscape_kittens/4.jpg'></li>
+    <li><img src='no_landscape_kittens/5.jpg'></li>
+    <li><img src='no_landscape_kittens/6.jpg'></li>
+    <li><img src='no_landscape_kittens/7.jpg'></li>
+    <li><img src='no_landscape_kittens/8.jpg'></li>
   </ul>
 </body>
 </html>
