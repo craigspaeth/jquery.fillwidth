@@ -50,7 +50,16 @@ describe "jQuery.fillwidth", ->
     
     xit 'given an in-memory row will attempt to resize the landscapes down', ->
       @$fixture.fillwidth('initialStyling')
-      row = @$fixture.fillwidth('breakUpIntoRows')[0]
-      console.log row
-      console.log @$fixture.fillwidth('resizeLandscapes', row)
       
+  describe 'setRowHeight', ->
+    
+    xit 'it makes sure all of the lis are the same height', ->
+      
+      
+  describe 'considerMargins', ->
+    
+    xit 'reduces the entire row by the sum of its margins', ->
+      
+  describe 'removeMargin', ->
+    
+    xit 'sets the last list items margin to 0', ->

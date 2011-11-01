@@ -98,8 +98,8 @@
         methods.resizeLandscapes row
       
       for row in currentRows
-        methods.setRowHeight row
         methods.considerMargins row
+        methods.setRowHeight row
         row.updateDOM()
       
     # Determine which set of lis go over the edge of the container, and store their 
@@ -125,7 +125,6 @@
     # Reduces the row so that it fits with margins
     considerMargins: (row) ->
       li.setWidth li.width - li.margin for li in row.lis
-      
     
     # Removes the right margin from the last row element
     removeMargin: (row) ->
@@ -133,7 +132,7 @@
       lastLi.margin = 0
       lastLi.$el.css "margin-right": 0
     
-    # Resize the landscape's width to fit the frame
+    # Resize the landscape's height so that it fits the frame
     resizeLandscapes: (row) ->
       
       # Determine our landscapes

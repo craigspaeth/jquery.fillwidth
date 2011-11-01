@@ -99,8 +99,8 @@
         _results = [];
         for (_j = 0, _len2 = currentRows.length; _j < _len2; _j++) {
           row = currentRows[_j];
-          methods.setRowHeight(row);
           methods.considerMargins(row);
+          methods.setRowHeight(row);
           _results.push(row.updateDOM());
         }
         return _results;

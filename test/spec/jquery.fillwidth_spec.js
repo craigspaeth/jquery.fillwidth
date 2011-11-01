@@ -39,14 +39,19 @@
         return expect(this.$fixture.fillwidth('breakUpIntoRows')[1].lis.length).toEqual(1);
       });
     });
-    return describe('resizeLandscapes', function() {
+    describe('resizeLandscapes', function() {
       return xit('given an in-memory row will attempt to resize the landscapes down', function() {
-        var row;
-        this.$fixture.fillwidth('initialStyling');
-        row = this.$fixture.fillwidth('breakUpIntoRows')[0];
-        console.log(row);
-        return console.log(this.$fixture.fillwidth('resizeLandscapes', row));
+        return this.$fixture.fillwidth('initialStyling');
       });
+    });
+    describe('setRowHeight', function() {
+      return xit('it makes sure all of the lis are the same height', function() {});
+    });
+    describe('considerMargins', function() {
+      return xit('reduces the entire row by the sum of its margins', function() {});
+    });
+    return describe('removeMargin', function() {
+      return xit('sets the last list items margin to 0', function() {});
     });
   });
 }).call(this);
