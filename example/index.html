@@ -6,17 +6,16 @@
   <script type="text/javascript" src="src/jquery.min.js"></script>
   <script type="text/javascript" src="src/jquery.fillwidth.js"></script>
   <script>
-    // $(function(){
-    //   var $clone, html ='';
-    //   for(var i = 0; i < 2; i++) {
-    //     html += '<ul>' + $('ul').first().html() + '</ul'
-    //   }
-    //   $('body').append(html);
-    //   $('ul').first().remove()
-    //   $('ul').fillwidth()
-    // });
-    $(function() {
-      $('ul').fillwidth();
+    $(function(){
+      // var html ='';
+      // for(var i = 0; i < 20; i++) {
+      //   html += '<ul>' + $('ul').first().html() + '</ul>'
+      // }
+      // $('body').append(html);
+      // $('ul').first().remove();
+      $('ul').fillwidth({
+        resizeLandscapesBy: 200
+      });
     });
   </script>
   <style>
@@ -25,7 +24,7 @@
       overflow: hidden;
     }
     li {
-      margin: 50px 15px 0 0;
+      margin: 0 15px 50px 0;
     }
   </style
 </head>
@@ -41,6 +40,7 @@
     <li><img src='kittens/7.jpeg'></li>
     <li><img src='kittens/8.jpeg'></li>
   </ul>
+  <!--
   <ul id='no_landscapes'>
     <li><img src='no_landscape_kittens/1.jpg'></li>
     <li><img src='no_landscape_kittens/2.jpg'></li>
@@ -51,5 +51,6 @@
     <li><img src='no_landscape_kittens/7.jpg'></li>
     <li><img src='no_landscape_kittens/8.jpg'></li>
   </ul>
+  -->
 </body>
 </html>

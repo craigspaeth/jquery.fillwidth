@@ -13,16 +13,14 @@
   
   # Options
   # -------
-  _defaults = 
-    callback: null
-    resizeLandscapesBy: 95
-    landscapeRatios: [3, 2, 1.5, 1.25, 1]
-    
+  _defaults =
+    resizeLandscapesBy: 200
+    landscapeRatios: (i / 10 for i in [10..50])
   options = $.extend _defaults, options
   
   # Globals
   # -------
-  frameWidth = 0; currentRows =[];
+  frameWidth = 0;
   
   # In memory row and li objects
   # ----------------------------
@@ -32,15 +30,14 @@
       @originalWidth = @width = $(el).outerWidth()
       @originalHeight = @height = $(el).outerHeight(true)
       @originalMargin = @margin = $(el).outerWidth(true) - $(el).outerWidth()
-      @imageHeight = $(el).children('img').height()
       @$el = $(el)
       
     setHeight: (h) ->
-      @width = Math.ceil(h * (@width / @height))
+      @width = h * (@width / @height)
       @height = h
     
     setWidth: (w) ->
-      @height = Math.ceil(w * (@height / @width))
+      @height = w * (@height / @width)
       @width = w
       
     decWidth: -> @setWidth @width - 1
@@ -53,7 +50,6 @@
     
     updateDOM: ->
       @$el.width @width
-      @$el.height @height
       
     reset: ->
       @width = @originalWidth
@@ -61,7 +57,6 @@
       @margin = @originalMargin
       @$el.css 
         "margin-right": @originalMargin
-        height: 'auto'
         width: 'auto'
       
   class Row
@@ -71,7 +66,7 @@
       
     width: ->
       width = 0
-      width += li.width for li in @lis
+      width += (li.width + li.margin) for li in @lis
       width
       
     updateDOM: ->
@@ -81,6 +76,50 @@
     reset: ->
       li.reset() for li in @lis
       
+    # Get an array of groups of landscapes in order of options.landscapeRatios
+    # e.g. [[li,li],[li,li,li]]
+    landscapeGroups: ->
+      landscapeGroups = []
+      for i, ratio of options.landscapeRatios
+        ratio = options.landscapeRatios[i]
+        landscapeGroups.push (li for li in @lis when (li.width / li.height) >= ratio)
+      landscapeGroups
+      
+    # Resize the landscape's height so that it fits the frame
+    resizeLandscapes: ->
+      for landscapes in @landscapeGroups()
+        continue if landscapes.length is 0
+        
+        # Reduce the landscapes until we are within the frame or beyond our threshold
+        for i in [1..options.resizeLandscapesBy]
+          li.decHeight() for li in landscapes
+          break if @width() <= frameWidth
+        break if @width() <= frameWidth
+      @
+    
+    # Resize the entire row height by a maximum ammount in an attempt make the margins
+    resizeHeight: ->
+      while @width() > frameWidth
+        li.decHeight() for li in @lis
+    
+    # Round off all of the li's width
+    roundOff: ->
+      li.setWidth(Math.floor li.width) for li in @lis 
+    
+    # Arbitrarily extend lis to fill in any pixels that got rounded off
+    fillLeftoverPixels: ->
+      @roundOff()
+      diff = => frameWidth - @width()
+      return if diff() > 20
+      
+      landscapes = $.map @landscapeGroups(), (item) -> item 
+      
+      # Randomly pick any lis and extend them to fit the row width
+      i = 0
+      while diff() > 0
+        landscapes[i].incWidth()
+        i++
+        
   # Debounce stolen from underscore.js
   # ----------------------------------
   debounce = (func, wait) ->
@@ -100,16 +139,19 @@
     
     # Called on initialization of the plugin
     init: ->
-      methods.initialStyling.apply @
-      lineup = =>
-        row.reset() for row in currentRows
-        @each ->
+      options = $.extend options, arguments[0]
+      
+      @each ->
+        methods.initialStyling.apply $(@)
+        lineup = =>
+          if $(@).data('fillwidth.rows')?
+            row.reset() for row in $(@).data 'fillwidth.rows'
           $(@).width 'auto'
           methods.lineUp.apply @
           $(@).width $(@).width()
-      
-      $(window).resize debounce lineup, 250
-      lineup()
+          
+        $(window).resize lineup
+        lineup()
       
     # Initial styling applied to the element to get lis to line up horizontally and images to be 
     # contained well in them.
@@ -128,31 +170,35 @@
     # Combines all of the magic and lines the lis up
     lineUp: ->
       frameWidth = $(@).width()
-      currentRows = methods.breakUpIntoRows.apply @
+      $(@).data 'fillwidth.rows', methods.breakUpIntoRows.apply @
       
       # Go through each row and try various things to line up
-      for row in currentRows
+      for row in $(@).data 'fillwidth.rows'
         methods.removeMargin row
-        methods.resizeLandscapes row
-        methods.fillLeftoverPixels row
-        methods.considerMargins row
-        methods.setRowHeight row
+        row.resizeHeight()
+        row.resizeLandscapes()
+        row.fillLeftoverPixels()
         row.updateDOM()
-      
-      setTimeout (-> methods.firefoxScrollbarBug.apply @), 1
+        methods.setRowHeight row
+        
+      methods.firefoxScrollbarBug.apply @
     
     # Firefox work-around for ghost scrollbar bug
     firefoxScrollbarBug: ->
-      for row in currentRows[0..currentRows.length - 2]
-        $lastLi = row.lis[row.lis.length - 1].$el
-        diff = $(@).width() - ($lastLi.outerWidth(true) + $lastLi.position().left)
-        if $.browser.mozilla and diff is 24
-          for i in [1..15]
-            index = Math.round Math.random() * (row.lis.length - 1)
-            randomRow = row.lis[index]
-            randomRow.incWidth()
-          methods.setRowHeight row
-          row.updateDOM()
+      return unless $.browser.mozilla
+      setTimeout (->
+        rows = $(@).data 'fillwidth.rows'
+        return unless rows?
+        for row in rows[0..rows.length - 2]
+          $lastLi = row.lis[row.lis.length - 1].$el
+          diff = $(@).width() - ($lastLi.outerWidth(true) + $lastLi.position().left)
+          if diff is 24
+            for i in [1..15]
+              index = Math.round Math.random() * (row.lis.length - 1)
+              randomRow = row.lis[index]
+              randomRow.incWidth()
+            row.updateDOM()
+      ), 1
      
     # Determine which set of lis go over the edge of the container, and store their 
     # { width, height, el, etc.. } in an array. Storing the width and height in objects helps run 
@@ -169,15 +215,12 @@
     
     # Makes sure all of the lis are the same height (the tallest list item in the row)
     setRowHeight: (row) ->
-      unsortedLis = (li for li in row.lis)
-      sortedLis = unsortedLis.sort (a, b) -> b.imageHeight - a.imageHeight
-      height = sortedLis[0].imageHeight
-      li.height = height for li in sortedLis
-    
-    # Reduces the row so that it fits with margins
-    considerMargins: (row) ->
-      for li in row.lis
-        li.setWidth(li.width - li.margin)
+      setTimeout (->
+        unsortedLis = (li for li in row.lis)
+        sortedLis = unsortedLis.sort (a, b) -> b.$el.height() - a.$el.height()
+        height = sortedLis[0].$el.height()
+        li.$el.height height for li in sortedLis
+      ), 1
     
     # Removes the right margin from the last row element
     removeMargin: (row) ->
@@ -185,36 +228,6 @@
       lastLi.width -= lastLi.margin
       lastLi.margin = 0
       lastLi.$el.css "margin-right": 0
-    
-    # Resize the landscape's height so that it fits the frame
-    resizeLandscapes: (row) ->
-      
-      # Determine our landscapes
-      for i, ratio of options.landscapeRatios
-        ratio = options.landscapeRatios[i]
-        landscapes = (li for li in row.lis when (li.width / li.height) >= ratio)
-        
-        continue if landscapes.length is 0
-        
-        # Reduce the landscapes until we are within the frame or beyond our threshold
-        for i in [1..options.resizeLandscapesBy]
-          li.decHeight() for li in landscapes
-          break if row.width() <= frameWidth
-        break if row.width() <= frameWidth
-      
-      li.updateWidth() for li in row
-      row
-      
-    # Arbitrarily extend lis in a row to fill in any pixels that got rounded off
-    fillLeftoverPixels: (row) ->
-      diff = -> frameWidth - row.width()
-      return if diff() > 20
-      
-      # Randomly pick any lis and extend them to fit the row width
-      while diff() > 0
-        index = Math.round Math.random() * (row.lis.length - 1)
-        randomRow = row.lis[index]
-        randomRow.incWidth()
           
   # Either call a method if passed a string, or call init if passed an object
   $.fn.fillwidth = (method) ->
