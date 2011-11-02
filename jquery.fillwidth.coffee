@@ -15,6 +15,7 @@
   # -------
   _defaults =
     resizeLandscapesBy: 200
+    resizeRowBy: 15
     landscapeRatios: (i / 10 for i in [10..50])
   options = $.extend _defaults, options
   
@@ -50,6 +51,7 @@
     
     updateDOM: ->
       @$el.width @width
+      @$el.css 'margin-right': @margin
       
     reset: ->
       @width = @originalWidth
@@ -58,6 +60,7 @@
       @$el.css 
         "margin-right": @originalMargin
         width: 'auto'
+        height: 'auto'
       
   class Row
     
@@ -99,7 +102,9 @@
     
     # Resize the entire row height by a maximum ammount in an attempt make the margins
     resizeHeight: ->
-      while @width() > frameWidth
+      i = 0
+      while @width() > frameWidth and i < options.resizeRowBy
+        i++
         li.decHeight() for li in @lis
     
     # Round off all of the li's width
@@ -119,6 +124,12 @@
       while diff() > 0
         landscapes[i].incWidth()
         i++
+        i = 0 if landscapes.length - 1 is i
+        
+    # Removes the right margin from the last row element
+    removeMargin: ->
+      lastLi = @lis[@lis.length - 1]
+      lastLi.margin = 0
         
   # Debounce stolen from underscore.js
   # ----------------------------------
@@ -140,7 +151,7 @@
     # Called on initialization of the plugin
     init: ->
       options = $.extend options, arguments[0]
-      
+    
       @each ->
         methods.initialStyling.apply $(@)
         lineup = =>
@@ -149,10 +160,10 @@
           $(@).width 'auto'
           methods.lineUp.apply @
           $(@).width $(@).width()
-          
-        $(window).resize lineup
+        
+        $(window).resize debounce lineup, 200
         lineup()
-      
+    
     # Initial styling applied to the element to get lis to line up horizontally and images to be 
     # contained well in them.
     initialStyling: ->
@@ -174,7 +185,7 @@
       
       # Go through each row and try various things to line up
       for row in $(@).data 'fillwidth.rows'
-        methods.removeMargin row
+        row.removeMargin()
         row.resizeHeight()
         row.resizeLandscapes()
         row.fillLeftoverPixels()
@@ -221,13 +232,6 @@
         height = sortedLis[0].$el.height()
         li.$el.height height for li in sortedLis
       ), 1
-    
-    # Removes the right margin from the last row element
-    removeMargin: (row) ->
-      lastLi = row.lis[row.lis.length - 1]
-      lastLi.width -= lastLi.margin
-      lastLi.margin = 0
-      lastLi.$el.css "margin-right": 0
           
   # Either call a method if passed a string, or call init if passed an object
   $.fn.fillwidth = (method) ->

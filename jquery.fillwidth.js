@@ -4,6 +4,7 @@
     var Li, Row, debounce, frameWidth, i, methods, options, _defaults;
     _defaults = {
       resizeLandscapesBy: 200,
+      resizeRowBy: 15,
       landscapeRatios: (function() {
         var _results;
         _results = [];
@@ -43,7 +44,10 @@
         return this.setHeight(this.height + 1);
       };
       Li.prototype.updateDOM = function() {
-        return this.$el.width(this.width);
+        this.$el.width(this.width);
+        return this.$el.css({
+          'margin-right': this.margin
+        });
       };
       Li.prototype.reset = function() {
         this.width = this.originalWidth;
@@ -51,7 +55,8 @@
         this.margin = this.originalMargin;
         return this.$el.css({
           "margin-right": this.originalMargin,
-          width: 'auto'
+          width: 'auto',
+          height: 'auto'
         });
       };
       return Li;
@@ -141,8 +146,10 @@
       };
       Row.prototype.resizeHeight = function() {
         var li, _results;
+        i = 0;
         _results = [];
-        while (this.width() > frameWidth) {
+        while (this.width() > frameWidth && i < options.resizeRowBy) {
+          i++;
           _results.push((function() {
             var _i, _len, _ref, _results2;
             _ref = this.lis;
@@ -182,9 +189,15 @@
         _results = [];
         while (diff() > 0) {
           landscapes[i].incWidth();
-          _results.push(i++);
+          i++;
+          _results.push(landscapes.length - 1 === i ? i = 0 : void 0);
         }
         return _results;
+      };
+      Row.prototype.removeMargin = function() {
+        var lastLi;
+        lastLi = this.lis[this.lis.length - 1];
+        return lastLi.margin = 0;
       };
       return Row;
     })();
@@ -221,7 +234,7 @@
             methods.lineUp.apply(this);
             return $(this).width($(this).width());
           }, this);
-          $(window).resize(lineup);
+          $(window).resize(debounce(lineup, 200));
           return lineup();
         });
       },
@@ -248,7 +261,7 @@
         _ref = $(this).data('fillwidth.rows');
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           row = _ref[_i];
-          methods.removeMargin(row);
+          row.removeMargin();
           row.resizeHeight();
           row.resizeLandscapes();
           row.fillLeftoverPixels();
@@ -326,15 +339,6 @@
           }
           return _results;
         }), 1);
-      },
-      removeMargin: function(row) {
-        var lastLi;
-        lastLi = row.lis[row.lis.length - 1];
-        lastLi.width -= lastLi.margin;
-        lastLi.margin = 0;
-        return lastLi.$el.css({
-          "margin-right": 0
-        });
       }
     };
     return $.fn.fillwidth = function(method) {
