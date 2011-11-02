@@ -154,16 +154,23 @@
     
       @each ->
         methods.initialStyling.apply $(@)
-        lineup = =>
-          if $(@).data('fillwidth.rows')?
-            row.reset() for row in $(@).data 'fillwidth.rows'
-          $(@).width 'auto'
-          methods.lineUp.apply @
-          $(@).width $(@).width()
+        lineup = => methods.lineUp.apply @
         
-        $(window).resize debounce lineup, 200
-        lineup()
-    
+        # Decide to run lineUp after all of the child images have loaded, or before hand depending
+        # on whether the options to do the latter have been specified.
+        initLineup = =>
+          $(window).resize debounce lineup, 200
+          lineup()
+          console.log 'lined up'
+        if options.rowHeight? and options.liWidths?
+          initLineup()
+        else
+          $imgs = $(@).find('img')
+          imagesToLoad = $imgs.length
+          $imgs.load ->
+            imagesToLoad--
+            initLineup() if imagesToLoad is 0
+          
     # Initial styling applied to the element to get lis to line up horizontally and images to be 
     # contained well in them.
     initialStyling: ->
@@ -173,15 +180,28 @@
         margin: 0
       $(@).append "<div class='fillwidth-clearfix' style='clear:both'></div>"
       $(@).children('li').css float: 'left'
-      $(@).children('li').children('img').css
+      $(@).find('img').css
         display: 'block'
         'max-width': '100%'
         'max-height': '100%'
+        
+      if options.rowHeight? and options.liWidths?
+        $(@).children('li').each (i) ->
+          $(@).height options.rowHeight
+          $(@).width options.liWidths[i]
     
     # Combines all of the magic and lines the lis up
     lineUp: ->
+      
+      # Unfreeze the container and reset the list items
+      if $(@).data('fillwidth.rows')?
+        row.reset() for row in $(@).data 'fillwidth.rows'
+      $(@).width 'auto'
+      
+      # Get the new container width and store the new rows
       frameWidth = $(@).width()
       $(@).data 'fillwidth.rows', methods.breakUpIntoRows.apply @
+      
       
       # Go through each row and try various things to line up
       for row in $(@).data 'fillwidth.rows'
@@ -193,7 +213,10 @@
         methods.setRowHeight row
         
       methods.firefoxScrollbarBug.apply @
-    
+      
+      # Defer refreezing the width after all is said and done
+      setTimeout (-> $(@).width $(@).width()), 2
+      
     # Firefox work-around for ghost scrollbar bug
     firefoxScrollbarBug: ->
       return unless $.browser.mozilla

@@ -13,8 +13,22 @@
       // }
       // $('body').append(html);
       // $('ul').first().remove();
+      var kittens = "<ul>";
+      var liWidths = [];
+      for(var i = 0; i < 200; i++) {
+        randWidth = Math.ceil(50 + (Math.random() * 300))
+        kittens += "<li><img src='http://placekitten.com/"
+                + randWidth
+                + "/200'"
+                + "></li>";
+        liWidths.push(randWidth);
+      }
+      kittens += "</ul>";
+      $('body').append(kittens);
       $('ul').fillwidth({
-        resizeLandscapesBy: 200
+        resizeLandscapesBy: 200,
+        rowHeight: 200,
+        liWidths: liWidths
       });
     });
   </script>
@@ -25,11 +39,14 @@
     }
     li {
       margin: 0 15px 15px 0;
+      height: 200px;
+      background: #efefef;
     }
   </style
 </head>
 
 <body>
+  <!--
   <ul>
     <li><img src='kittens/1.jpeg'></li>
     <li><img src='kittens/2.jpeg'></li>
@@ -40,7 +57,6 @@
     <li><img src='kittens/7.jpeg'></li>
     <li><img src='kittens/8.jpeg'></li>
   </ul>
-  <!--
   <ul id='no_landscapes'>
     <li><img src='no_landscape_kittens/1.jpg'></li>
     <li><img src='no_landscape_kittens/2.jpg'></li>

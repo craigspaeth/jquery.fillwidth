@@ -219,23 +219,28 @@
       init: function() {
         options = $.extend(options, arguments[0]);
         return this.each(function() {
-          var lineup;
+          var $imgs, imagesToLoad, initLineup, lineup;
           methods.initialStyling.apply($(this));
           lineup = __bind(function() {
-            var row, _i, _len, _ref;
-            if ($(this).data('fillwidth.rows') != null) {
-              _ref = $(this).data('fillwidth.rows');
-              for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-                row = _ref[_i];
-                row.reset();
-              }
-            }
-            $(this).width('auto');
-            methods.lineUp.apply(this);
-            return $(this).width($(this).width());
+            return methods.lineUp.apply(this);
           }, this);
-          $(window).resize(debounce(lineup, 200));
-          return lineup();
+          initLineup = __bind(function() {
+            $(window).resize(debounce(lineup, 200));
+            lineup();
+            return console.log('lined up');
+          }, this);
+          if ((options.rowHeight != null) && (options.liWidths != null)) {
+            return initLineup();
+          } else {
+            $imgs = $(this).find('img');
+            imagesToLoad = $imgs.length;
+            return $imgs.load(function() {
+              imagesToLoad--;
+              if (imagesToLoad === 0) {
+                return initLineup();
+              }
+            });
+          }
         });
       },
       initialStyling: function() {
@@ -248,19 +253,33 @@
         $(this).children('li').css({
           float: 'left'
         });
-        return $(this).children('li').children('img').css({
+        $(this).find('img').css({
           display: 'block',
           'max-width': '100%',
           'max-height': '100%'
         });
+        if ((options.rowHeight != null) && (options.liWidths != null)) {
+          return $(this).children('li').each(function(i) {
+            $(this).height(options.rowHeight);
+            return $(this).width(options.liWidths[i]);
+          });
+        }
       },
       lineUp: function() {
-        var row, _i, _len, _ref;
+        var row, _i, _j, _len, _len2, _ref, _ref2;
+        if ($(this).data('fillwidth.rows') != null) {
+          _ref = $(this).data('fillwidth.rows');
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            row = _ref[_i];
+            row.reset();
+          }
+        }
+        $(this).width('auto');
         frameWidth = $(this).width();
         $(this).data('fillwidth.rows', methods.breakUpIntoRows.apply(this));
-        _ref = $(this).data('fillwidth.rows');
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          row = _ref[_i];
+        _ref2 = $(this).data('fillwidth.rows');
+        for (_j = 0, _len2 = _ref2.length; _j < _len2; _j++) {
+          row = _ref2[_j];
           row.removeMargin();
           row.resizeHeight();
           row.resizeLandscapes();
@@ -268,7 +287,10 @@
           row.updateDOM();
           methods.setRowHeight(row);
         }
-        return methods.firefoxScrollbarBug.apply(this);
+        methods.firefoxScrollbarBug.apply(this);
+        return setTimeout((function() {
+          return $(this).width($(this).width());
+        }), 2);
       },
       firefoxScrollbarBug: function() {
         if (!$.browser.mozilla) {

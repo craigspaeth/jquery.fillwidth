@@ -27,3 +27,45 @@ allow the user to pass an array of aspectRatios like so
   0.24
   etc
 ]
+
+## Being able to run this while images load
+
+* If don't know the aspect ratios of the image before hand then you would simply have to
+wait until all of the children images are loaded before running fillWidth.
+
+* If you do know the aspect ratios of the images before hand then you'll *have* to specify a row
+height. As well as being able to attach aspectRatios to the img elements to determine the width.
+
+should this be done in the markup like so...
+
+li {
+  height: 200px
+}
+<img width='<%= I know my width %>'>
+
+or specified in the plugin like so....
+
+fillwidth
+  rowHeight: 200
+  aspectRatios: [
+    2.53,
+    345.2345
+  ]
+  
+horizontalResultRow
+
+  fillwidth
+    rowHeight: 260
+    aspectRatios: (model.get('best_width') / model.get('best_height') for model in @collection.models)
+    
+**This also presents the problem of the rows not resizing their height until after a row has been 
+loaded**
+
+This could be tackled simply by saying after all of the images inside their row load resize the row.
+(Lots of jumping after each row is loaded)
+
+
+.... the winner is! In the plugin. Don't leave mistakes up to configuration.
+
+If there is a rowHeight & aspectRatios option then set those things in the initialStyling. Otherwise
+wait until all child images have loaded before running fillWidth.

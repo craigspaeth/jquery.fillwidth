@@ -1,5 +1,6 @@
-* Adjust margins
-* Handle image loading/Elements with no width
 * More than just an image inside the lis
-* The option to resizeLandscapeBy a %
+* Handle resizing of container jaggedness
+* Deal with lots of portraits by shuffling rows around
 * Cross browser
+* Adjust margins
+* The option to resizeLandscapeBy a %
