@@ -180,9 +180,6 @@
         diff = __bind(function() {
           return frameWidth - this.width();
         }, this);
-        if (diff() > 20) {
-          return;
-        }
         i = 0;
         _results = [];
         while (diff() > 0) {

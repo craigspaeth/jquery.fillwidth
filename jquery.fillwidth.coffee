@@ -115,7 +115,6 @@
     fillLeftoverPixels: ->
       @roundOff()
       diff = => frameWidth - @width()
-      return if diff() > 20
       
       # Int
       i = 0
@@ -217,8 +216,6 @@
         row.fillLeftoverPixels()
         row.lockHeight()
         row.updateDOM()
-      
-      # methods.setRowHeights.apply @  
       methods.firefoxScrollbarBug.apply @
     
     # Returns the current in-memory row objects
