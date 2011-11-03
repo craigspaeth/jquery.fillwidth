@@ -235,7 +235,7 @@
             lineup = __bind(function() {
               return methods.lineUp.apply(this);
             }, this);
-            $(window).resize(debounce(lineup, 400));
+            $(window).resize(debounce(lineup, 300));
             return lineup();
           }, this);
           $imgs = $(this).find('img');
@@ -283,7 +283,7 @@
         }
       },
       lineUp: function() {
-        var row, _i, _j, _len, _len2, _ref, _ref2;
+        var row, rows, _i, _j, _len, _len2, _ref;
         if ($(this).data('fillwidth.rows') != null) {
           _ref = $(this).data('fillwidth.rows');
           for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -295,13 +295,15 @@
         frameWidth = $(this).width();
         $(this).data('fillwidth.rows', methods.breakUpIntoRows.apply(this));
         $(this).width(frameWidth);
-        _ref2 = $(this).data('fillwidth.rows');
-        for (_j = 0, _len2 = _ref2.length; _j < _len2; _j++) {
-          row = _ref2[_j];
+        rows = $(this).data('fillwidth.rows');
+        for (_j = 0, _len2 = rows.length; _j < _len2; _j++) {
+          row = rows[_j];
           row.removeMargin();
           row.resizeHeight();
           row.resizeLandscapes();
-          row.fillLeftoverPixels();
+          if (row !== rows[rows.length - 1]) {
+            row.fillLeftoverPixels();
+          }
           row.lockHeight();
           row.updateDOM();
         }

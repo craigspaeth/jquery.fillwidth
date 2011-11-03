@@ -9,5 +9,4 @@
 
 # Known bugs
 
-* A bunch of portraits for a small screen fux ish up
-* Occasionally something like 15 - 30 pixels off the right for certain rows
+* Things are bad when you get really small

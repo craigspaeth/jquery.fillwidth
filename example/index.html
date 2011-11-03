@@ -10,12 +10,14 @@
       var kittens = "<ul>";
       var liWidths = [];
       for(var i = 0; i < 80; i++) {
-        randWidth = Math.ceil(50 + (Math.random() * 400))
+        randWidth = Math.ceil(50 + (Math.random() * 600));
+        height =  200
         kittens += "<li>"
                 + "<div class='img_container'>"
-                + "<img src='http://placekitten.com/" + randWidth + "/200'>"
+                + "<img src='http://placekitten.com/" + randWidth + "/"
+                + height + "'>"
                 + "</div>"
-                // + "<p>Pablo Picasso</p><p>The Most Beautiful Cat in the entire world</p>"
+                + "<p>Pablo Picasso</p><p>The Most Beautiful Cat in the entire world</p>"
                 + "</li>";
         liWidths.push(randWidth);
       }
@@ -35,10 +37,13 @@
       border: 1px solid #ccc;
     }
     li {
-      margin: 0 10px 10px 0;
+      margin: 0 15px 15px 0;
+      font-size: 13px;
+      line-height: 13px;
+      font-family: georgia;
     }
     .img_container {
-      background: #f2f2f2;
+      height: 200px;
     }
   </style
 </head>

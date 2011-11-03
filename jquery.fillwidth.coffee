@@ -162,7 +162,7 @@
         # on whether the options to do the latter have been specified.
         initLineup = =>
           lineup = => methods.lineUp.apply @
-          $(window).resize debounce lineup, 400
+          $(window).resize debounce lineup, 300
           lineup()
         $imgs = $(@).find('img')
         if options.imgTargetHeight? and options.liWidths?
@@ -209,11 +209,12 @@
       $(@).width frameWidth
       
       # Go through each row and try various things to line up
-      for row in $(@).data 'fillwidth.rows'
+      rows = $(@).data('fillwidth.rows')
+      for row in rows
         row.removeMargin()
         row.resizeHeight()
         row.resizeLandscapes()
-        row.fillLeftoverPixels()
+        row.fillLeftoverPixels() unless row is rows[rows.length - 1]
         row.lockHeight()
         row.updateDOM()
       methods.firefoxScrollbarBug.apply @
