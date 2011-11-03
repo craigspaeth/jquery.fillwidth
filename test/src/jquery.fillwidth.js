@@ -56,7 +56,7 @@
         return this.$el.css({
           "margin-right": this.originalMargin,
           width: this.originalWidth,
-          height: this.originalHeight
+          height: 'auto'
         });
       };
       return Li;
@@ -224,7 +224,7 @@
             lineup = __bind(function() {
               return methods.lineUp.apply(this);
             }, this);
-            $(window).resize(debounce(lineup, 200));
+            $(window).resize(debounce(lineup, 400));
             return lineup();
           }, this);
           $imgs = $(this).find('img');
@@ -274,7 +274,6 @@
       lineUp: function() {
         var row, _i, _j, _len, _len2, _ref, _ref2;
         if ($(this).data('fillwidth.rows') != null) {
-          console.log('reset');
           _ref = $(this).data('fillwidth.rows');
           for (_i = 0, _len = _ref.length; _i < _len; _i++) {
             row = _ref[_i];
@@ -284,6 +283,7 @@
         $(this).width('auto');
         frameWidth = $(this).width();
         $(this).data('fillwidth.rows', methods.breakUpIntoRows.apply(this));
+        $(this).width(frameWidth);
         _ref2 = $(this).data('fillwidth.rows');
         for (_j = 0, _len2 = _ref2.length; _j < _len2; _j++) {
           row = _ref2[_j];
@@ -294,10 +294,7 @@
           row.updateDOM();
         }
         methods.setRowHeights.apply(this);
-        methods.firefoxScrollbarBug.apply(this);
-        return setTimeout((function() {
-          return $(this).width($(this).width());
-        }), 2);
+        return methods.firefoxScrollbarBug.apply(this);
       },
       rows: function() {
         return $(this).data('fillwidth.rows');

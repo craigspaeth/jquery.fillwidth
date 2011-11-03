@@ -52,8 +52,7 @@
     updateDOM: ->
       @$el.width @width
       @$el.css 'margin-right': @margin
-      # console.log @width, @$el, @$el.width()
-      
+    
     reset: ->
       @width = @originalWidth
       @height = @originalHeight
@@ -61,7 +60,7 @@
       @$el.css 
         "margin-right": @originalMargin
         width: @originalWidth
-        height: @originalHeight
+        height: 'auto'
       
   class Row
     
@@ -158,7 +157,7 @@
         # on whether the options to do the latter have been specified.
         initLineup = =>
           lineup = => methods.lineUp.apply @
-          $(window).resize debounce lineup, 200
+          $(window).resize debounce lineup, 400
           lineup()
         $imgs = $(@).find('img')
         if options.imgTargetHeight? and options.liWidths?
@@ -196,13 +195,13 @@
       
       # Unfreeze the container and reset the list items
       if $(@).data('fillwidth.rows')?
-        console.log 'reset'
         row.reset() for row in $(@).data 'fillwidth.rows'
       $(@).width 'auto'
       
-      # Get the new container width and store the new rows
+      # Get the new container width and store the new rows, then re-freeze
       frameWidth = $(@).width()
       $(@).data 'fillwidth.rows', methods.breakUpIntoRows.apply @
+      $(@).width frameWidth
       
       # Go through each row and try various things to line up
       for row in $(@).data 'fillwidth.rows'
@@ -214,9 +213,6 @@
       
       methods.setRowHeights.apply @  
       methods.firefoxScrollbarBug.apply @
-      
-      # Defer re-freezing the width after all is said and done
-      setTimeout (-> $(@).width $(@).width()), 2
     
     # Returns the current in-memory row objects
     rows: -> $(@).data 'fillwidth.rows'
