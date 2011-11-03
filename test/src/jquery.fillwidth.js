@@ -5,22 +5,25 @@
     _defaults = {
       resizeLandscapesBy: 200,
       resizeRowBy: 15,
-      landscapeRatios: (function() {
+      landscapeRatios: ((function() {
         var _results;
         _results = [];
-        for (i = 10; i <= 50; i++) {
+        for (i = 10; i <= 50; i += 3) {
           _results.push(i / 10);
         }
         return _results;
-      })()
+      })()).reverse()
     };
     options = $.extend(_defaults, options);
     frameWidth = 0;
     Li = (function() {
       function Li(el) {
+        var $img;
         this.originalWidth = this.width = $(el).outerWidth();
         this.originalHeight = this.height = $(el).outerHeight();
         this.originalMargin = this.margin = $(el).outerWidth(true) - $(el).outerWidth();
+        $img = $(el).find('img');
+        this.imgRatio = $img.width() / $img.height();
         this.$el = $(el);
       }
       Li.prototype.setHeight = function(h) {
@@ -101,24 +104,25 @@
         return _results;
       };
       Row.prototype.landscapeGroups = function() {
-        var i, landscapeGroups, li, ratio, _ref;
+        var i, landscapeGroups, landscapes, li, ratio, _ref;
         landscapeGroups = [];
         _ref = options.landscapeRatios;
         for (i in _ref) {
           ratio = _ref[i];
           ratio = options.landscapeRatios[i];
-          landscapeGroups.push((function() {
+          landscapes = (function() {
             var _i, _len, _ref2, _results;
             _ref2 = this.lis;
             _results = [];
             for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
               li = _ref2[_i];
-              if ((li.width / li.height) >= ratio) {
+              if (li.imgRatio >= ratio) {
                 _results.push(li);
               }
             }
             return _results;
-          }).call(this));
+          }).call(this);
+          landscapeGroups.push(landscapes);
         }
         return landscapeGroups;
       };
@@ -266,6 +270,9 @@
           margin: 0,
           overflow: 'hidden'
         });
+        if (options.initStyling != null) {
+          $(this).css(options.initStyling);
+        }
         $(this).append("<div class='fillwidth-clearfix' style='clear:both'></div>");
         $(this).children('li').css({
           float: 'left'
@@ -274,6 +281,9 @@
           display: 'block',
           'max-width': '100%',
           'max-height': '100%'
+        });
+        $(this).find('img').css({
+          width: '100%'
         });
         if ((options.imgTargetHeight != null) && (options.liWidths != null)) {
           return $(this).children('li').each(function(i) {

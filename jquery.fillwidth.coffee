@@ -16,7 +16,7 @@
   _defaults =
     resizeLandscapesBy: 200
     resizeRowBy: 15
-    landscapeRatios: (i / 10 for i in [10..50])
+    landscapeRatios: (i / 10 for i in [10..50] by 3).reverse()
   options = $.extend _defaults, options
   
   # Globals
@@ -31,6 +31,8 @@
       @originalWidth = @width = $(el).outerWidth()
       @originalHeight = @height = $(el).outerHeight()
       @originalMargin = @margin = $(el).outerWidth(true) - $(el).outerWidth()
+      $img = $(el).find('img')
+      @imgRatio = $img.width() / $img.height()
       @$el = $(el)
       
     setHeight: (h) ->
@@ -85,7 +87,8 @@
       landscapeGroups = []
       for i, ratio of options.landscapeRatios
         ratio = options.landscapeRatios[i]
-        landscapeGroups.push (li for li in @lis when (li.width / li.height) >= ratio)
+        landscapes = (li for li in @lis when li.imgRatio >= ratio)
+        landscapeGroups.push landscapes
       landscapeGroups
       
     # Resize the landscape's height so that it fits the frame
@@ -183,12 +186,15 @@
         padding: 0
         margin: 0
         overflow: 'hidden'
+      $(@).css options.initStyling if options.initStyling? 
       $(@).append "<div class='fillwidth-clearfix' style='clear:both'></div>"
       $(@).children('li').css float: 'left'
       $(@).find('*').css
         display: 'block'
         'max-width': '100%'
         'max-height': '100%'
+      $(@).find('img').css
+        width: '100%'
       
       if options.imgTargetHeight? and options.liWidths?
         $(@).children('li').each (i) ->
@@ -217,6 +223,7 @@
         row.fillLeftoverPixels() unless row is rows[rows.length - 1]
         row.lockHeight()
         row.updateDOM()
+        
       methods.firefoxScrollbarBug.apply @
     
     # Returns the current in-memory row objects
