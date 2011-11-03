@@ -29,7 +29,7 @@
     
     constructor: (el) ->
       @originalWidth = @width = $(el).outerWidth()
-      @originalHeight = @height = $(el).outerHeight(true)
+      @originalHeight = @height = $(el).outerHeight()
       @originalMargin = @margin = $(el).outerWidth(true) - $(el).outerWidth()
       @$el = $(el)
       
@@ -76,8 +76,7 @@
       li.updateDOM() for li in @lis
       
     # Resets the styling of the lis to be able to run calculations on a clean slate
-    reset: ->
-      li.reset() for li in @lis
+    reset: -> li.reset() for li in @lis
       
     # Get an array of groups of landscapes in order of options.landscapeRatios
     # e.g. [[li,li],[li,li,li]]
@@ -117,14 +116,13 @@
       diff = => frameWidth - @width()
       return if diff() > 20
       
-      landscapes = $.map @landscapeGroups(), (item) -> item 
-      
-      # Randomly pick any lis and extend them to fit the row width
+      # Int
       i = 0
       while diff() > 0
-        landscapes[i].incWidth()
+        randIndex = Math.round Math.random() * (@lis.length - 1)
+        @lis[randIndex].incWidth()
         i++
-        i = 0 if landscapes.length - 1 is i
+        i = 0 if @lis.length - 1 is i
         
     # Removes the right margin from the last row element
     removeMargin: ->
@@ -153,7 +151,7 @@
       options = $.extend options, arguments[0]
     
       @each ->
-        methods.initialStyling.apply $(@)
+        methods.initStyling.apply $(@)
         lineup = => methods.lineUp.apply @
         
         # Decide to run lineUp after all of the child images have loaded, or before hand depending
@@ -162,10 +160,12 @@
           $(window).resize debounce lineup, 200
           lineup()
           console.log 'lined up'
-        if options.rowHeight? and options.liWidths?
+        $imgs = $(@).find('img')
+        if options.imgTargetHeight? and options.liWidths?
           initLineup()
+          $imgs.css(opacity: 0).load -> 
+            $(@).height('auto').animate(opacity: 1)
         else
-          $imgs = $(@).find('img')
           imagesToLoad = $imgs.length
           $imgs.load ->
             imagesToLoad--
@@ -173,21 +173,22 @@
           
     # Initial styling applied to the element to get lis to line up horizontally and images to be 
     # contained well in them.
-    initialStyling: ->
+    initStyling: ->
       $(@).css
         'list-style': 'none'
         padding: 0
         margin: 0
+        overflow: 'hidden'
       $(@).append "<div class='fillwidth-clearfix' style='clear:both'></div>"
       $(@).children('li').css float: 'left'
       $(@).find('img').css
         display: 'block'
         'max-width': '100%'
         'max-height': '100%'
-        
-      if options.rowHeight? and options.liWidths?
+      
+      if options.imgTargetHeight? and options.liWidths?
         $(@).children('li').each (i) ->
-          $(@).height options.rowHeight
+          $(@).find('img').height options.imgTargetHeight
           $(@).width options.liWidths[i]
     
     # Combines all of the magic and lines the lis up
@@ -202,7 +203,6 @@
       frameWidth = $(@).width()
       $(@).data 'fillwidth.rows', methods.breakUpIntoRows.apply @
       
-      
       # Go through each row and try various things to line up
       for row in $(@).data 'fillwidth.rows'
         row.removeMargin()
@@ -210,29 +210,15 @@
         row.resizeLandscapes()
         row.fillLeftoverPixels()
         row.updateDOM()
-        methods.setRowHeight row
-        
+      
+      methods.setRowHeights.apply @  
       methods.firefoxScrollbarBug.apply @
       
       # Defer refreezing the width after all is said and done
       setTimeout (-> $(@).width $(@).width()), 2
-      
-    # Firefox work-around for ghost scrollbar bug
-    firefoxScrollbarBug: ->
-      return unless $.browser.mozilla
-      setTimeout (->
-        rows = $(@).data 'fillwidth.rows'
-        return unless rows?
-        for row in rows[0..rows.length - 2]
-          $lastLi = row.lis[row.lis.length - 1].$el
-          diff = $(@).width() - ($lastLi.outerWidth(true) + $lastLi.position().left)
-          if diff is 24
-            for i in [1..15]
-              index = Math.round Math.random() * (row.lis.length - 1)
-              randomRow = row.lis[index]
-              randomRow.incWidth()
-            row.updateDOM()
-      ), 1
+    
+    # Returns the current in-memory row objects
+    rows: -> $(@).data 'fillwidth.rows'
      
     # Determine which set of lis go over the edge of the container, and store their 
     # { width, height, el, etc.. } in an array. Storing the width and height in objects helps run 
@@ -248,12 +234,31 @@
       rows
     
     # Makes sure all of the lis are the same height (the tallest list item in the row)
-    setRowHeight: (row) ->
+    setRowHeights: ->
+      setTimeout (=>
+        rows = methods.rows.apply @
+        console.log rows
+        for row in rows
+          sortedLis = row.lis.sort (a, b) -> b.$el.height() - a.$el.height()
+          height = sortedLis[0].$el.height()
+          li.$el.height height for li in sortedLis
+      ), 1
+      
+    # Firefox work-around for ghost scrollbar bug
+    firefoxScrollbarBug: ->
+      return unless $.browser.mozilla
       setTimeout (->
-        unsortedLis = (li for li in row.lis)
-        sortedLis = unsortedLis.sort (a, b) -> b.$el.height() - a.$el.height()
-        height = sortedLis[0].$el.height()
-        li.$el.height height for li in sortedLis
+        rows = methods.rows.apply @
+        return unless rows?
+        for row in rows[0..rows.length - 2]
+          $lastLi = row.lis[row.lis.length - 1].$el
+          diff = $(@).width() - ($lastLi.outerWidth(true) + $lastLi.position().left)
+          if diff is 24
+            for i in [1..15]
+              index = Math.round Math.random() * (row.lis.length - 1)
+              randomRow = row.lis[index]
+              randomRow.incWidth()
+            row.updateDOM()
       ), 1
           
   # Either call a method if passed a string, or call init if passed an object

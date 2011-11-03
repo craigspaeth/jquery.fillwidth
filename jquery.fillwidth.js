@@ -19,7 +19,7 @@
     Li = (function() {
       function Li(el) {
         this.originalWidth = this.width = $(el).outerWidth();
-        this.originalHeight = this.height = $(el).outerHeight(true);
+        this.originalHeight = this.height = $(el).outerHeight();
         this.originalMargin = this.margin = $(el).outerWidth(true) - $(el).outerWidth();
         this.$el = $(el);
       }
@@ -174,7 +174,7 @@
         return _results;
       };
       Row.prototype.fillLeftoverPixels = function() {
-        var diff, landscapes, _results;
+        var diff, randIndex, _results;
         this.roundOff();
         diff = __bind(function() {
           return frameWidth - this.width();
@@ -182,15 +182,13 @@
         if (diff() > 20) {
           return;
         }
-        landscapes = $.map(this.landscapeGroups(), function(item) {
-          return item;
-        });
         i = 0;
         _results = [];
         while (diff() > 0) {
-          landscapes[i].incWidth();
+          randIndex = Math.round(Math.random() * (this.lis.length - 1));
+          this.lis[randIndex].incWidth();
           i++;
-          _results.push(landscapes.length - 1 === i ? i = 0 : void 0);
+          _results.push(this.lis.length - 1 === i ? i = 0 : void 0);
         }
         return _results;
       };
@@ -220,7 +218,7 @@
         options = $.extend(options, arguments[0]);
         return this.each(function() {
           var $imgs, imagesToLoad, initLineup, lineup;
-          methods.initialStyling.apply($(this));
+          methods.initStyling.apply($(this));
           lineup = __bind(function() {
             return methods.lineUp.apply(this);
           }, this);
@@ -229,10 +227,17 @@
             lineup();
             return console.log('lined up');
           }, this);
-          if ((options.rowHeight != null) && (options.liWidths != null)) {
-            return initLineup();
+          $imgs = $(this).find('img');
+          if ((options.imgTargetHeight != null) && (options.liWidths != null)) {
+            initLineup();
+            return $imgs.css({
+              opacity: 0
+            }).load(function() {
+              return $(this).height('auto').animate({
+                opacity: 1
+              });
+            });
           } else {
-            $imgs = $(this).find('img');
             imagesToLoad = $imgs.length;
             return $imgs.load(function() {
               imagesToLoad--;
@@ -243,11 +248,12 @@
           }
         });
       },
-      initialStyling: function() {
+      initStyling: function() {
         $(this).css({
           'list-style': 'none',
           padding: 0,
-          margin: 0
+          margin: 0,
+          overflow: 'hidden'
         });
         $(this).append("<div class='fillwidth-clearfix' style='clear:both'></div>");
         $(this).children('li').css({
@@ -258,9 +264,9 @@
           'max-width': '100%',
           'max-height': '100%'
         });
-        if ((options.rowHeight != null) && (options.liWidths != null)) {
+        if ((options.imgTargetHeight != null) && (options.liWidths != null)) {
           return $(this).children('li').each(function(i) {
-            $(this).height(options.rowHeight);
+            $(this).find('img').height(options.imgTargetHeight);
             return $(this).width(options.liWidths[i]);
           });
         }
@@ -285,12 +291,55 @@
           row.resizeLandscapes();
           row.fillLeftoverPixels();
           row.updateDOM();
-          methods.setRowHeight(row);
         }
+        methods.setRowHeights.apply(this);
         methods.firefoxScrollbarBug.apply(this);
         return setTimeout((function() {
           return $(this).width($(this).width());
         }), 2);
+      },
+      rows: function() {
+        return $(this).data('fillwidth.rows');
+      },
+      breakUpIntoRows: function() {
+        var li, rows, _i, _len, _ref;
+        i = 0;
+        rows = [new Row()];
+        _ref = $(this).children('li');
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          li = _ref[_i];
+          rows[i].lis.push(new Li(li));
+          if (rows[i].width() >= $(this).width() && _i !== $(this).children('li').length - 1) {
+            rows.push(new Row());
+            i++;
+          }
+        }
+        return rows;
+      },
+      setRowHeights: function() {
+        return setTimeout((__bind(function() {
+          var height, li, row, rows, sortedLis, _i, _len, _results;
+          rows = methods.rows.apply(this);
+          console.log(rows);
+          _results = [];
+          for (_i = 0, _len = rows.length; _i < _len; _i++) {
+            row = rows[_i];
+            sortedLis = row.lis.sort(function(a, b) {
+              return b.$el.height() - a.$el.height();
+            });
+            height = sortedLis[0].$el.height();
+            _results.push((function() {
+              var _j, _len2, _results2;
+              _results2 = [];
+              for (_j = 0, _len2 = sortedLis.length; _j < _len2; _j++) {
+                li = sortedLis[_j];
+                _results2.push(li.$el.height(height));
+              }
+              return _results2;
+            })());
+          }
+          return _results;
+        }, this)), 1);
       },
       firefoxScrollbarBug: function() {
         if (!$.browser.mozilla) {
@@ -298,7 +347,7 @@
         }
         return setTimeout((function() {
           var $lastLi, diff, i, index, randomRow, row, rows, _i, _len, _ref, _results;
-          rows = $(this).data('fillwidth.rows');
+          rows = methods.rows.apply(this);
           if (rows == null) {
             return;
           }
@@ -318,46 +367,6 @@
                 return row.updateDOM();
               }
             })());
-          }
-          return _results;
-        }), 1);
-      },
-      breakUpIntoRows: function() {
-        var li, rows, _i, _len, _ref;
-        i = 0;
-        rows = [new Row()];
-        _ref = $(this).children('li');
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          li = _ref[_i];
-          rows[i].lis.push(new Li(li));
-          if (rows[i].width() >= $(this).width() && _i !== $(this).children('li').length - 1) {
-            rows.push(new Row());
-            i++;
-          }
-        }
-        return rows;
-      },
-      setRowHeight: function(row) {
-        return setTimeout((function() {
-          var height, li, sortedLis, unsortedLis, _i, _len, _results;
-          unsortedLis = (function() {
-            var _i, _len, _ref, _results;
-            _ref = row.lis;
-            _results = [];
-            for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-              li = _ref[_i];
-              _results.push(li);
-            }
-            return _results;
-          })();
-          sortedLis = unsortedLis.sort(function(a, b) {
-            return b.$el.height() - a.$el.height();
-          });
-          height = sortedLis[0].$el.height();
-          _results = [];
-          for (_i = 0, _len = sortedLis.length; _i < _len; _i++) {
-            li = sortedLis[_i];
-            _results.push(li.$el.height(height));
           }
           return _results;
         }), 1);

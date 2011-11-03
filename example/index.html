@@ -7,29 +7,27 @@
   <script type="text/javascript" src="src/jquery.fillwidth.js"></script>
   <script>
     $(function(){
-      // var html ='';
-      // for(var i = 0; i < 20; i++) {
-      //   html += '<ul>' + $('ul').first().html() + '</ul>'
-      // }
-      // $('body').append(html);
-      // $('ul').first().remove();
       var kittens = "<ul>";
       var liWidths = [];
-      for(var i = 0; i < 200; i++) {
+      for(var i = 0; i < 80; i++) {
         randWidth = Math.ceil(50 + (Math.random() * 300))
-        kittens += "<li><img src='http://placekitten.com/"
-                + randWidth
-                + "/200'"
-                + "></li>";
+        kittens += "<li>"
+                + "<div class='img_container'>"
+                + "<img src='http://placekitten.com/" + randWidth + "/200'>"
+                + "</div>"
+                // + "<p>Pablo Picasso</p><p>The Most Beautiful Cat in the entire world</p>"
+                + "</li>";
         liWidths.push(randWidth);
       }
       kittens += "</ul>";
       $('body').append(kittens);
       $('ul').fillwidth({
-        resizeLandscapesBy: 200,
-        rowHeight: 200,
-        liWidths: liWidths
+        resizeLandscapesBy: 70,
+        imgTargetHeight: 200,
+        liWidths: liWidths,
+        resizeRowBy: 15
       });
+      // $('img').css({opacity: 0}).load(function() { $(this).animate({opacity: 1})  })
     });
   </script>
   <style>
@@ -39,8 +37,12 @@
     }
     li {
       margin: 0 15px 15px 0;
-      height: 200px;
-      background: #efefef;
+    }
+    li * {
+      max-width: 100%;
+    }
+    .img_container {
+      min-height: 1px;
     }
   </style
 </head>
