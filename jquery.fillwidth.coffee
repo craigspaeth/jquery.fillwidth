@@ -51,6 +51,7 @@
     
     updateDOM: ->
       @$el.width @width
+      @$el.height @height
       @$el.css 'margin-right': @margin
     
     reset: ->
@@ -60,7 +61,7 @@
       @$el.css 
         "margin-right": @originalMargin
         width: @originalWidth
-        height: 'auto'
+        height: @height
       
   class Row
     
@@ -128,6 +129,11 @@
     removeMargin: ->
       lastLi = @lis[@lis.length - 1]
       lastLi.margin = 0
+      
+    # Make sure all of the lis are the same height (the tallest li in the group)
+    lockHeight: ->
+      tallestHeight = Math.floor (@lis.sort (a, b) -> b.height - a.height)[0].height
+      li.height = tallestHeight for li in @lis
         
   # Debounce stolen from underscore.js
   # ----------------------------------
@@ -209,9 +215,10 @@
         row.resizeHeight()
         row.resizeLandscapes()
         row.fillLeftoverPixels()
+        row.lockHeight()
         row.updateDOM()
       
-      methods.setRowHeights.apply @  
+      # methods.setRowHeights.apply @  
       methods.firefoxScrollbarBug.apply @
     
     # Returns the current in-memory row objects
@@ -229,16 +236,6 @@
           rows.push new Row()
           i++
       rows
-    
-    # Makes sure all of the lis are the same height (the tallest list item in the row)
-    setRowHeights: ->
-      setTimeout (=>
-        rows = methods.rows.apply @
-        for row in rows
-          sortedLis = row.lis.sort (a, b) -> b.$el.height() - a.$el.height()
-          height = sortedLis[0].$el.height()
-          li.$el.height height for li in sortedLis
-      ), 1
       
     # Firefox work-around for ghost scrollbar bug
     firefoxScrollbarBug: ->

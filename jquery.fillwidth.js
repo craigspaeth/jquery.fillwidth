@@ -45,6 +45,7 @@
       };
       Li.prototype.updateDOM = function() {
         this.$el.width(this.width);
+        this.$el.height(this.height);
         return this.$el.css({
           'margin-right': this.margin
         });
@@ -56,7 +57,7 @@
         return this.$el.css({
           "margin-right": this.originalMargin,
           width: this.originalWidth,
-          height: 'auto'
+          height: this.height
         });
       };
       return Li;
@@ -197,6 +198,19 @@
         lastLi = this.lis[this.lis.length - 1];
         return lastLi.margin = 0;
       };
+      Row.prototype.lockHeight = function() {
+        var li, tallestHeight, _i, _len, _ref, _results;
+        tallestHeight = Math.floor((this.lis.sort(function(a, b) {
+          return b.height - a.height;
+        }))[0].height);
+        _ref = this.lis;
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          li = _ref[_i];
+          _results.push(li.height = tallestHeight);
+        }
+        return _results;
+      };
       return Row;
     })();
     debounce = function(func, wait) {
@@ -291,9 +305,9 @@
           row.resizeHeight();
           row.resizeLandscapes();
           row.fillLeftoverPixels();
+          row.lockHeight();
           row.updateDOM();
         }
-        methods.setRowHeights.apply(this);
         return methods.firefoxScrollbarBug.apply(this);
       },
       rows: function() {
@@ -313,30 +327,6 @@
           }
         }
         return rows;
-      },
-      setRowHeights: function() {
-        return setTimeout((__bind(function() {
-          var height, li, row, rows, sortedLis, _i, _len, _results;
-          rows = methods.rows.apply(this);
-          _results = [];
-          for (_i = 0, _len = rows.length; _i < _len; _i++) {
-            row = rows[_i];
-            sortedLis = row.lis.sort(function(a, b) {
-              return b.$el.height() - a.$el.height();
-            });
-            height = sortedLis[0].$el.height();
-            _results.push((function() {
-              var _j, _len2, _results2;
-              _results2 = [];
-              for (_j = 0, _len2 = sortedLis.length; _j < _len2; _j++) {
-                li = sortedLis[_j];
-                _results2.push(li.$el.height(height));
-              }
-              return _results2;
-            })());
-          }
-          return _results;
-        }, this)), 1);
       },
       firefoxScrollbarBug: function() {
         if (!$.browser.mozilla) {

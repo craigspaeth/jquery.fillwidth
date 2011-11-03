@@ -9,5 +9,4 @@
 
 # Known bugs
 
-* Flash of the rows being broken up before setRowHeights is run.
 * Occasionally something like 15 - 30 pixels off the right for certain rows
