@@ -55,8 +55,8 @@
         this.margin = this.originalMargin;
         return this.$el.css({
           "margin-right": this.originalMargin,
-          width: 'auto',
-          height: 'auto'
+          width: this.originalWidth,
+          height: this.originalHeight
         });
       };
       return Li;
@@ -217,15 +217,15 @@
       init: function() {
         options = $.extend(options, arguments[0]);
         return this.each(function() {
-          var $imgs, imagesToLoad, initLineup, lineup;
+          var $imgs, imagesToLoad, initLineup;
           methods.initStyling.apply($(this));
-          lineup = __bind(function() {
-            return methods.lineUp.apply(this);
-          }, this);
           initLineup = __bind(function() {
+            var lineup;
+            lineup = __bind(function() {
+              return methods.lineUp.apply(this);
+            }, this);
             $(window).resize(debounce(lineup, 200));
-            lineup();
-            return console.log('lined up');
+            return lineup();
           }, this);
           $imgs = $(this).find('img');
           if ((options.imgTargetHeight != null) && (options.liWidths != null)) {
@@ -259,7 +259,7 @@
         $(this).children('li').css({
           float: 'left'
         });
-        $(this).find('img').css({
+        $(this).find('*').css({
           display: 'block',
           'max-width': '100%',
           'max-height': '100%'
@@ -274,6 +274,7 @@
       lineUp: function() {
         var row, _i, _j, _len, _len2, _ref, _ref2;
         if ($(this).data('fillwidth.rows') != null) {
+          console.log('reset');
           _ref = $(this).data('fillwidth.rows');
           for (_i = 0, _len = _ref.length; _i < _len; _i++) {
             row = _ref[_i];
@@ -320,7 +321,6 @@
         return setTimeout((__bind(function() {
           var height, li, row, rows, sortedLis, _i, _len, _results;
           rows = methods.rows.apply(this);
-          console.log(rows);
           _results = [];
           for (_i = 0, _len = rows.length; _i < _len; _i++) {
             row = rows[_i];

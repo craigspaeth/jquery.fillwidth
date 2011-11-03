@@ -1,6 +1,9 @@
-* More than just an image inside the lis
 * Handle resizing of container jaggedness
+* Smudge margins around as an option
+* If all else fails just resize the width of random lis until it makes the width
+* Bug the shit out of it until it works 99 out of 100 times
 * Cross browser
-* Resize row heights at break points in window resize
-* Adjust margins as screen size is begger
+* Resize row heights to be bigger as screen size is bigger
+* Adjust margins to be bigger as screen size is bigger
+* Better API that allows passing a hash of methodName: [arguments]
 * The option to determine resizeBy with a %

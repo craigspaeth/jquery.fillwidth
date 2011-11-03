@@ -15,17 +15,17 @@
                 + "<div class='img_container'>"
                 + "<img src='http://placekitten.com/" + randWidth + "/200'>"
                 + "</div>"
-                // + "<p>Pablo Picasso</p><p>The Most Beautiful Cat in the entire world</p>"
+                + "<p>Pablo Picasso</p><p>The Most Beautiful Cat in the entire world</p>"
                 + "</li>";
         liWidths.push(randWidth);
       }
       kittens += "</ul>";
       $('body').append(kittens);
       $('ul').fillwidth({
-        resizeLandscapesBy: 70,
+        resizeLandscapesBy: 100,
         imgTargetHeight: 200,
         liWidths: liWidths,
-        resizeRowBy: 15
+        resizeRowBy: 30
       });
       // $('img').css({opacity: 0}).load(function() { $(this).animate({opacity: 1})  })
     });
@@ -43,6 +43,8 @@
     }
     .img_container {
       min-height: 1px;
+      height: 200px;
+      background: #f2f2f2;
     }
   </style
 </head>

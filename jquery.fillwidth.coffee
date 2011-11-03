@@ -52,6 +52,7 @@
     updateDOM: ->
       @$el.width @width
       @$el.css 'margin-right': @margin
+      # console.log @width, @$el, @$el.width()
       
     reset: ->
       @width = @originalWidth
@@ -59,8 +60,8 @@
       @margin = @originalMargin
       @$el.css 
         "margin-right": @originalMargin
-        width: 'auto'
-        height: 'auto'
+        width: @originalWidth
+        height: @originalHeight
       
   class Row
     
@@ -152,18 +153,17 @@
     
       @each ->
         methods.initStyling.apply $(@)
-        lineup = => methods.lineUp.apply @
         
         # Decide to run lineUp after all of the child images have loaded, or before hand depending
         # on whether the options to do the latter have been specified.
         initLineup = =>
+          lineup = => methods.lineUp.apply @
           $(window).resize debounce lineup, 200
           lineup()
-          console.log 'lined up'
         $imgs = $(@).find('img')
         if options.imgTargetHeight? and options.liWidths?
           initLineup()
-          $imgs.css(opacity: 0).load -> 
+          $imgs.css(opacity: 0).load ->
             $(@).height('auto').animate(opacity: 1)
         else
           imagesToLoad = $imgs.length
@@ -181,7 +181,7 @@
         overflow: 'hidden'
       $(@).append "<div class='fillwidth-clearfix' style='clear:both'></div>"
       $(@).children('li').css float: 'left'
-      $(@).find('img').css
+      $(@).find('*').css
         display: 'block'
         'max-width': '100%'
         'max-height': '100%'
@@ -196,6 +196,7 @@
       
       # Unfreeze the container and reset the list items
       if $(@).data('fillwidth.rows')?
+        console.log 'reset'
         row.reset() for row in $(@).data 'fillwidth.rows'
       $(@).width 'auto'
       
@@ -214,7 +215,7 @@
       methods.setRowHeights.apply @  
       methods.firefoxScrollbarBug.apply @
       
-      # Defer refreezing the width after all is said and done
+      # Defer re-freezing the width after all is said and done
       setTimeout (-> $(@).width $(@).width()), 2
     
     # Returns the current in-memory row objects
@@ -237,7 +238,6 @@
     setRowHeights: ->
       setTimeout (=>
         rows = methods.rows.apply @
-        console.log rows
         for row in rows
           sortedLis = row.lis.sort (a, b) -> b.$el.height() - a.$el.height()
           height = sortedLis[0].$el.height()
