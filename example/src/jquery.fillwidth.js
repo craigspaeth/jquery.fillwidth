@@ -179,20 +179,25 @@
         return _results;
       };
       Row.prototype.fillLeftoverPixels = function() {
-        var diff, randIndex, _results;
+        var diff, randIndex;
         this.roundOff();
         diff = __bind(function() {
           return frameWidth - this.width();
         }, this);
         i = 0;
-        _results = [];
-        while (diff() > 0) {
+        while (diff() !== 0) {
           randIndex = Math.round(Math.random() * (this.lis.length - 1));
-          this.lis[randIndex].incWidth();
+          if (diff() < 0) {
+            this.lis[randIndex].decWidth();
+          } else {
+            this.lis[randIndex].incWidth();
+          }
           i++;
-          _results.push(this.lis.length - 1 === i ? i = 0 : void 0);
+          if (this.lis.length - 1 === i) {
+            i = 0;
+          }
         }
-        return _results;
+        return console.log(diff());
       };
       Row.prototype.removeMargin = function() {
         var lastLi;

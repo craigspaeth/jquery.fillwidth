@@ -121,11 +121,16 @@
       
       # Int
       i = 0
-      while diff() > 0
+      while diff() isnt 0
         randIndex = Math.round Math.random() * (@lis.length - 1)
-        @lis[randIndex].incWidth()
+        if diff() < 0
+          @lis[randIndex].decWidth()  
+        else
+          @lis[randIndex].incWidth()
         i++
         i = 0 if @lis.length - 1 is i
+        
+      console.log diff()
         
     # Removes the right margin from the last row element
     removeMargin: ->
