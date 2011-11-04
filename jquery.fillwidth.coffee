@@ -130,8 +130,6 @@
         i++
         i = 0 if @lis.length - 1 is i
         
-      console.log diff()
-        
     # Removes the right margin from the last row element
     removeMargin: ->
       lastLi = @lis[@lis.length - 1]
@@ -175,8 +173,7 @@
         $imgs = $(@).find('img')
         if options.imgTargetHeight? and options.liWidths?
           initLineup()
-          $imgs.css(opacity: 0).load ->
-            $(@).height('auto').animate(opacity: 1)
+          $imgs.load -> $(@).height('auto')
         else
           imagesToLoad = $imgs.length
           $imgs.load ->
@@ -195,7 +192,6 @@
       $(@).append "<div class='fillwidth-clearfix' style='clear:both'></div>"
       $(@).children('li').css float: 'left'
       $(@).find('*').css
-        display: 'block'
         'max-width': '100%'
         'max-height': '100%'
       $(@).find('img').css
