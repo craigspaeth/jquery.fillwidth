@@ -12,7 +12,8 @@
           _results.push(i / 10);
         }
         return _results;
-      })()).reverse()
+      })()).reverse(),
+      fillLastRow: false
     };
     options = $.extend(_defaults, options);
     frameWidth = 0;
@@ -310,7 +311,7 @@
           row.removeMargin();
           row.resizeHeight();
           row.resizeLandscapes();
-          if (row !== rows[rows.length - 1]) {
+          if (!(row === rows[rows.length - 1] && !options.fillLastRow)) {
             row.fillLeftoverPixels();
           }
           row.lockHeight();

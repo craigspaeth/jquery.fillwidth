@@ -17,6 +17,7 @@
     resizeLandscapesBy: 200
     resizeRowBy: 15
     landscapeRatios: (i / 10 for i in [10..50] by 3).reverse()
+    fillLastRow: false
   options = $.extend _defaults, options
   
   # Globals
@@ -160,7 +161,7 @@
     # Called on initialization of the plugin
     init: ->
       options = $.extend options, arguments[0]
-    
+      
       @each ->
         methods.initStyling.apply $(@)
         
@@ -221,7 +222,7 @@
         row.removeMargin()
         row.resizeHeight()
         row.resizeLandscapes()
-        row.fillLeftoverPixels() unless row is rows[rows.length - 1]
+        row.fillLeftoverPixels() unless row is rows[rows.length - 1] and not options.fillLastRow
         row.lockHeight()
         row.updateDOM()
         
