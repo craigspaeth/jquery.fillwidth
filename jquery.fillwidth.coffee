@@ -190,7 +190,7 @@
         margin: 0
         overflow: 'hidden'
       $(@).css options.initStyling if options.initStyling? 
-      $(@).children('li').css float: 'left'
+      $(@).children('li').css 'float': 'left'
       $(@).find('*').css
         'max-width': '100%'
         'max-height': '100%'
