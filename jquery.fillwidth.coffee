@@ -169,7 +169,7 @@
         # on whether the options to do the latter have been specified.
         initLineup = =>
           lineup = => methods.lineUp.apply @
-          $(window).resize debounce lineup, 300
+          $(window).bind 'resize.fillwidth', debounce lineup, 300
           lineup()
         $imgs = $(@).find('img')
         if options.imgTargetHeight? and options.liWidths?
@@ -190,7 +190,6 @@
         margin: 0
         overflow: 'hidden'
       $(@).css options.initStyling if options.initStyling? 
-      $(@).append "<div class='fillwidth-clearfix' style='clear:both'></div>"
       $(@).children('li').css float: 'left'
       $(@).find('*').css
         'max-width': '100%'
@@ -202,6 +201,28 @@
         $(@).children('li').each (i) ->
           $(@).find('img').height options.imgTargetHeight
           $(@).width options.liWidths[i]
+    
+    # Resets the styling to the original
+    removeInitStyling: ->
+      $(@).css
+        overflow: 'inherit'
+      $(@).children('li').css 
+        'float': 'inherit'
+        width: 'inherit'
+        height: 'inherit'
+        'margin-right': 'inherit'
+      $(@).find('*').css
+        'max-width': 'inherit'
+        'max-height': 'inherit'
+      $(@).find('img').css
+        width: 'inherit'
+    
+    # Removes the fillwidth functionality completely. Returns the element back to it's state
+    destroy: ->
+      $(window).unbind 'resize.fillwidth'
+      methods.removeInitStyling.apply @
+      @each ->
+        $(@).data('fillwidth.rows')
     
     # Combines all of the magic and lines the lis up
     lineUp: ->

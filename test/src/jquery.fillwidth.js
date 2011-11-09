@@ -244,7 +244,7 @@
             lineup = __bind(function() {
               return methods.lineUp.apply(this);
             }, this);
-            $(window).resize(debounce(lineup, 300));
+            $(window).bind('resize.fillwidth', debounce(lineup, 300));
             return lineup();
           }, this);
           $imgs = $(this).find('img');
@@ -274,7 +274,6 @@
         if (options.initStyling != null) {
           $(this).css(options.initStyling);
         }
-        $(this).append("<div class='fillwidth-clearfix' style='clear:both'></div>");
         $(this).children('li').css({
           float: 'left'
         });
@@ -291,6 +290,31 @@
             return $(this).width(options.liWidths[i]);
           });
         }
+      },
+      removeInitStyling: function() {
+        $(this).css({
+          overflow: 'inherit'
+        });
+        $(this).children('li').css({
+          'float': 'inherit',
+          width: 'inherit',
+          height: 'inherit',
+          'margin-right': 'inherit'
+        });
+        $(this).find('*').css({
+          'max-width': 'inherit',
+          'max-height': 'inherit'
+        });
+        return $(this).find('img').css({
+          width: 'inherit'
+        });
+      },
+      destroy: function() {
+        $(window).unbind('resize.fillwidth');
+        methods.removeInitStyling.apply(this);
+        return this.each(function() {
+          return $(this).data('fillwidth.rows');
+        });
       },
       lineUp: function() {
         var row, rows, _i, _j, _len, _len2, _ref;
