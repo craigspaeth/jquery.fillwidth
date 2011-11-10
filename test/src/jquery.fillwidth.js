@@ -194,7 +194,7 @@
       };
       Row.prototype.removeMargin = function() {
         var lastLi;
-        lastLi = this.lis.slice(-1);
+        lastLi = this.lis[this.lis.length - 1];
         return lastLi.margin = 0;
       };
       Row.prototype.lockHeight = function() {
@@ -268,8 +268,7 @@
           $(this).css(options.initStyling);
         }
         $(this).children('li').css({
-          'float': 'left',
-          'margin-left': 0
+          'float': 'left'
         });
         $(this).find('*').css({
           'max-width': '100%',

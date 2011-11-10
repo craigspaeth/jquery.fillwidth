@@ -129,7 +129,7 @@
         
     # Removes the right margin from the last row element
     removeMargin: ->
-      lastLi = @lis.slice(-1)
+      lastLi = @lis[@lis.length - 1]
       lastLi.margin = 0
       
     # Make sure all of the lis are the same height (the tallest li in the group)
@@ -188,7 +188,6 @@
       $(@).css options.initStyling if options.initStyling? 
       $(@).children('li').css
         'float': 'left'
-        'margin-left': 0
       $(@).find('*').css
         'max-width': '100%'
         'max-height': '100%'
