@@ -256,9 +256,9 @@
     breakUpIntoRows: ->
       i = 0
       rows = [new Row()]
-      for li in $(@).children('li')
+      $(@).children('li').each (j, li) =>
         rows[i].lis.push new Li li
-        if rows[i].width() >= $(@).width() and _i isnt $(@).children('li').length - 1
+        if rows[i].width() >= $(@).width() and j isnt $(@).children('li').length - 1
           rows.push new Row()
           i++
       rows

@@ -341,18 +341,16 @@
         return $(this).data('fillwidth.rows');
       },
       breakUpIntoRows: function() {
-        var li, rows, _i, _len, _ref;
+        var rows;
         i = 0;
         rows = [new Row()];
-        _ref = $(this).children('li');
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          li = _ref[_i];
+        $(this).children('li').each(__bind(function(j, li) {
           rows[i].lis.push(new Li(li));
-          if (rows[i].width() >= $(this).width() && _i !== $(this).children('li').length - 1) {
+          if (rows[i].width() >= $(this).width() && j !== $(this).children('li').length - 1) {
             rows.push(new Row());
-            i++;
+            return i++;
           }
-        }
+        }, this));
         return rows;
       },
       firefoxScrollbarBug: function() {
