@@ -285,31 +285,6 @@
           });
         }
       },
-      removeInitStyling: function() {
-        $(this).css({
-          overflow: 'inherit'
-        });
-        $(this).children('li').css({
-          'float': 'inherit',
-          width: 'inherit',
-          height: 'inherit',
-          'margin-right': 'inherit'
-        });
-        $(this).find('*').css({
-          'max-width': 'inherit',
-          'max-height': 'inherit'
-        });
-        return $(this).find('img').css({
-          width: 'inherit'
-        });
-      },
-      destroy: function() {
-        $(window).unbind('resize.fillwidth');
-        methods.removeInitStyling.apply(this);
-        return this.each(function() {
-          return $(this).data('fillwidth.rows');
-        });
-      },
       lineUp: function() {
         var row, rows, _i, _j, _len, _len2, _ref;
         if ($(this).data('fillwidth.rows') != null) {

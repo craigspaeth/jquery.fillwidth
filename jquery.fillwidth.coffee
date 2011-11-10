@@ -200,28 +200,6 @@
           $(@).find('img').height options.imgTargetHeight
           $(@).width options.liWidths[i]
     
-    # Resets the styling to the original
-    removeInitStyling: ->
-      $(@).css
-        overflow: 'inherit'
-      $(@).children('li').css 
-        'float': 'inherit'
-        width: 'inherit'
-        height: 'inherit'
-        'margin-right': 'inherit'
-      $(@).find('*').css
-        'max-width': 'inherit'
-        'max-height': 'inherit'
-      $(@).find('img').css
-        width: 'inherit'
-    
-    # Removes the fillwidth functionality completely. Returns the element back to it's state
-    destroy: ->
-      $(window).unbind 'resize.fillwidth'
-      methods.removeInitStyling.apply @
-      @each ->
-        $(@).data('fillwidth.rows')
-    
     # Combines all of the magic and lines the lis up
     lineUp: ->
       
