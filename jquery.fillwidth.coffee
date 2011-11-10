@@ -120,20 +120,16 @@
       @roundOff()
       diff = => frameWidth - @width()
       
-      # Int
-      i = 0
       while diff() isnt 0
         randIndex = Math.round Math.random() * (@lis.length - 1)
         if diff() < 0
           @lis[randIndex].decWidth()  
         else
           @lis[randIndex].incWidth()
-        i++
-        i = 0 if @lis.length - 1 is i
         
     # Removes the right margin from the last row element
     removeMargin: ->
-      lastLi = @lis[@lis.length - 1]
+      lastLi = @lis.slice(-1)
       lastLi.margin = 0
       
     # Make sure all of the lis are the same height (the tallest li in the group)
@@ -190,7 +186,9 @@
         margin: 0
         overflow: 'hidden'
       $(@).css options.initStyling if options.initStyling? 
-      $(@).children('li').css 'float': 'left'
+      $(@).children('li').css
+        'float': 'left'
+        'margin-left': 0
       $(@).find('*').css
         'max-width': '100%'
         'max-height': '100%'

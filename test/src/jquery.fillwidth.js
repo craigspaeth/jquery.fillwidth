@@ -185,23 +185,16 @@
         diff = __bind(function() {
           return frameWidth - this.width();
         }, this);
-        i = 0;
         _results = [];
         while (diff() !== 0) {
           randIndex = Math.round(Math.random() * (this.lis.length - 1));
-          if (diff() < 0) {
-            this.lis[randIndex].decWidth();
-          } else {
-            this.lis[randIndex].incWidth();
-          }
-          i++;
-          _results.push(this.lis.length - 1 === i ? i = 0 : void 0);
+          _results.push(diff() < 0 ? this.lis[randIndex].decWidth() : this.lis[randIndex].incWidth());
         }
         return _results;
       };
       Row.prototype.removeMargin = function() {
         var lastLi;
-        lastLi = this.lis[this.lis.length - 1];
+        lastLi = this.lis.slice(-1);
         return lastLi.margin = 0;
       };
       Row.prototype.lockHeight = function() {
@@ -275,7 +268,8 @@
           $(this).css(options.initStyling);
         }
         $(this).children('li').css({
-          float: 'left'
+          'float': 'left',
+          'margin-left': 0
         });
         $(this).find('*').css({
           'max-width': '100%',
