@@ -285,6 +285,12 @@
           });
         }
       },
+      destroy: function() {
+        $(window).unbind('resize.fillwidth');
+        return this.each(function() {
+          return $(this).removeData('fillwidth.rows');
+        });
+      },
       lineUp: function() {
         var row, rows, _i, _j, _len, _len2, _ref;
         if ($(this).data('fillwidth.rows') != null) {

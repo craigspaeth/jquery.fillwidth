@@ -200,6 +200,12 @@
           $(@).find('img').height options.imgTargetHeight
           $(@).width options.liWidths[i]
     
+    # Removes the fillwidth functionality completely. Returns the element back to it's state
+    destroy: ->
+      $(window).unbind 'resize.fillwidth'
+      @each ->
+        $(@).removeData('fillwidth.rows')
+    
     # Combines all of the magic and lines the lis up
     lineUp: ->
       
