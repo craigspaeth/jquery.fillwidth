@@ -93,7 +93,6 @@
       _ref = this.settings.landscapeRatios;
       for (i in _ref) {
         ratio = _ref[i];
-        ratio = this.settings.landscapeRatios[i];
         landscapes = (function() {
           var _i, _len, _ref2, _results;
           _ref2 = this.lis;
@@ -111,24 +110,42 @@
       return landscapeGroups;
     };
     Row.prototype.resizeLandscapes = function() {
-      var i, landscapes, li, _i, _j, _len, _len2, _ref, _ref2;
-      _ref = this.landscapeGroups(this.settings.landscapeRatios);
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        landscapes = _ref[_i];
-        if (landscapes.length === 0) {
-          continue;
+      var i, landscape, landscapes, li, nonEmptyLandscapes, _i, _j, _k, _l, _len, _len2, _len3, _len4, _ref, _ref2;
+      nonEmptyLandscapes = (function() {
+        var _i, _len, _ref, _results;
+        _ref = this.landscapeGroups(this.settings.landscapeRatios);
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          landscapes = _ref[_i];
+          if (landscapes.length !== 0) {
+            _results.push(landscapes);
+          }
         }
-        for (i = 1, _ref2 = this.settings.landscapeRatios; 1 <= _ref2 ? i <= _ref2 : i >= _ref2; 1 <= _ref2 ? i++ : i--) {
-          for (_j = 0, _len2 = landscapes.length; _j < _len2; _j++) {
-            li = landscapes[_j];
-            li.decHeight();
+        return _results;
+      }).call(this);
+      for (_i = 0, _len = nonEmptyLandscapes.length; _i < _len; _i++) {
+        landscapes = nonEmptyLandscapes[_i];
+        for (_j = 0, _len2 = landscapes.length; _j < _len2; _j++) {
+          landscape = landscapes[_j];
+          console.log(landscape.$el);
+        }
+      }
+      _ref = this.landscapeGroups(this.settings.landscapeRatios);
+      for (_k = 0, _len3 = _ref.length; _k < _len3; _k++) {
+        landscapes = _ref[_k];
+        if (landscapes.length !== 0) {
+          for (i = 0, _ref2 = this.settings.resizeLandscapesBy; 0 <= _ref2 ? i <= _ref2 : i >= _ref2; 0 <= _ref2 ? i++ : i--) {
+            for (_l = 0, _len4 = landscapes.length; _l < _len4; _l++) {
+              li = landscapes[_l];
+              li.decHeight();
+            }
+            if (this.width() <= this.frameWidth) {
+              break;
+            }
           }
           if (this.width() <= this.frameWidth) {
             break;
           }
-        }
-        if (this.width() <= this.frameWidth) {
-          break;
         }
       }
       return this;
@@ -331,7 +348,7 @@
         row = rows[_j];
         row.removeMargin();
         row.resizeHeight();
-        row.resizeLandscapes(this.settings.landscapeRatios);
+        row.resizeLandscapes();
         if (!(row === rows[rows.length - 1] && !this.settings.fillLastRow)) {
           row.fillLeftoverPixels();
         }

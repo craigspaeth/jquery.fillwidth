@@ -74,18 +74,20 @@ class Row
   landscapeGroups: ->
     landscapeGroups = []
     for i, ratio of @settings.landscapeRatios
-      ratio = @settings.landscapeRatios[i]
       landscapes = (li for li in @lis when li.imgRatio >= ratio)
       landscapeGroups.push landscapes
     landscapeGroups
     
   # Resize the landscape's height so that it fits the frame
   resizeLandscapes: ->
-    for landscapes in @landscapeGroups(@settings.landscapeRatios)
-      continue if landscapes.length is 0
+    nonEmptyLandscapes = (landscapes for landscapes in @landscapeGroups(@settings.landscapeRatios) when landscapes.length isnt 0)
+    for landscapes in nonEmptyLandscapes
+      console.log landscape.$el for landscape in landscapes
+    
+    for landscapes in @landscapeGroups(@settings.landscapeRatios) when landscapes.length isnt 0
       
       # Reduce the landscapes until we are within the frame or beyond our threshold
-      for i in [1..@settings.landscapeRatios]
+      for i in [0..@settings.resizeLandscapesBy]
         li.decHeight() for li in landscapes
         break if @width() <= @frameWidth
       break if @width() <= @frameWidth
@@ -231,7 +233,7 @@ methods =
     for row in rows
       row.removeMargin()
       row.resizeHeight()
-      row.resizeLandscapes(@settings.landscapeRatios)
+      row.resizeLandscapes()
       row.fillLeftoverPixels() unless row is rows[rows.length - 1] and not @settings.fillLastRow
       row.lockHeight()
       row.updateDOM()
