@@ -9,267 +9,289 @@
 #   <li>
 #     <img>
 # 
-(($) ->
-  
-  # Options
-  # -------
-  _defaults =
-    resizeLandscapesBy: 200
-    resizeRowBy: 15
-    landscapeRatios: (i / 10 for i in [10..50] by 3).reverse()
-    fillLastRow: false
-  options = $.extend _defaults, options
-  
-  # Globals
-  # -------
-  frameWidth = 0;
-  
-  # In memory row and li objects
-  # ----------------------------
-  class Li
-    
-    constructor: (el) ->
-      @originalWidth = @width = $(el).outerWidth()
-      @originalHeight = @height = $(el).outerHeight()
-      @originalMargin = @margin = $(el).outerWidth(true) - $(el).outerWidth()
-      $img = $(el).find('img')
-      @imgRatio = $img.width() / $img.height()
-      @$el = $(el)
-      
-    setHeight: (h) ->
-      @width = h * (@width / @height)
-      @height = h
-    
-    setWidth: (w) ->
-      @height = w * (@height / @width)
-      @width = w
-      
-    decWidth: -> @setWidth @width - 1
-    
-    decHeight: -> @setHeight @height - 1
-    
-    incWidth: -> @setWidth @width + 1
-      
-    incHeight: -> @setHeight @height + 1
-    
-    updateDOM: ->
-      @$el.width @width
-      @$el.height @height
-      @$el.css 'margin-right': @margin
-    
-    reset: ->
-      @width = @originalWidth
-      @height = @originalHeight
-      @margin = @originalMargin
-      @$el.css 
-        "margin-right": @originalMargin
-        width: @originalWidth
-        height: @height
-      
-  class Row
-    
-    constructor: (@lis) ->
-      @lis ?= []
-      
-    width: ->
-      width = 0
-      width += (li.width + li.margin) for li in @lis
-      width
-      
-    updateDOM: ->
-      li.updateDOM() for li in @lis
-      
-    # Resets the styling of the lis to be able to run calculations on a clean slate
-    reset: -> li.reset() for li in @lis
-      
-    # Get an array of groups of landscapes in order of options.landscapeRatios
-    # e.g. [[li,li],[li,li,li]]
-    landscapeGroups: ->
-      landscapeGroups = []
-      for i, ratio of options.landscapeRatios
-        ratio = options.landscapeRatios[i]
-        landscapes = (li for li in @lis when li.imgRatio >= ratio)
-        landscapeGroups.push landscapes
-      landscapeGroups
-      
-    # Resize the landscape's height so that it fits the frame
-    resizeLandscapes: ->
-      for landscapes in @landscapeGroups()
-        continue if landscapes.length is 0
-        
-        # Reduce the landscapes until we are within the frame or beyond our threshold
-        for i in [1..options.resizeLandscapesBy]
-          li.decHeight() for li in landscapes
-          break if @width() <= frameWidth
-        break if @width() <= frameWidth
-      @
-    
-    # Resize the entire row height by a maximum ammount in an attempt make the margins
-    resizeHeight: ->
-      i = 0
-      while @width() > frameWidth and i < options.resizeRowBy
-        i++
-        li.decHeight() for li in @lis
-    
-    # Round off all of the li's width
-    roundOff: ->
-      li.setWidth(Math.floor li.width) for li in @lis 
-    
-    # Arbitrarily extend lis to fill in any pixels that got rounded off
-    fillLeftoverPixels: ->
-      @roundOff()
-      diff = => frameWidth - @width()
-      
-      while diff() isnt 0
-        randIndex = Math.round Math.random() * (@lis.length - 1)
-        if diff() < 0
-          @lis[randIndex].decWidth()  
-        else
-          @lis[randIndex].incWidth()
-        
-    # Removes the right margin from the last row element
-    removeMargin: ->
-      lastLi = @lis[@lis.length - 1]
-      lastLi.margin = 0
-      
-    # Make sure all of the lis are the same height (the tallest li in the group)
-    lockHeight: ->
-      tallestHeight = Math.floor (@lis.sort (a, b) -> b.height - a.height)[0].height
-      li.height = tallestHeight for li in @lis
-        
-  # Debounce stolen from underscore.js
-  # ----------------------------------
-  debounce = (func, wait) ->
-    timeout = 0
-    return ->
-      args = arguments
-      throttler = =>
-        timeout = null
-        func args
+$ = jQuery
 
-      clearTimeout timeout
-      timeout = setTimeout(throttler, wait)
+# In memory row and li objects
+# ----------------------------
+class Li
   
-  # Methods
-  # -------
-  methods =
+  constructor: (el) ->
+    @originalWidth = @width = $(el).outerWidth()
+    @originalHeight = @height = $(el).outerHeight()
+    @originalMargin = @margin = $(el).outerWidth(true) - $(el).outerWidth()
+    $img = $(el).find('img')
+    @imgRatio = $img.width() / $img.height()
+    @$el = $(el)
     
-    # Called on initialization of the plugin
-    init: ->
-      options = $.extend options, arguments[0]
-      
-      @each ->
-        methods.initStyling.apply $(@)
-        
-        # Decide to run lineUp after all of the child images have loaded, or before hand depending
-        # on whether the options to do the latter have been specified.
-        initLineup = =>
-          lineup = => methods.lineUp.apply @
-          $(window).bind 'resize.fillwidth', debounce lineup, 300
-          lineup()
-        $imgs = $(@).find('img')
-        if options.imgTargetHeight? and options.liWidths?
-          initLineup()
-          $imgs.load -> $(@).height('auto')
-        else
-          imagesToLoad = $imgs.length
-          $imgs.load ->
-            imagesToLoad--
-            initLineup() if imagesToLoad is 0
-          
-    # Initial styling applied to the element to get lis to line up horizontally and images to be 
-    # contained well in them.
-    initStyling: ->
-      $(@).css
-        'list-style': 'none'
-        padding: 0
-        margin: 0
-        overflow: 'hidden'
-      $(@).css options.initStyling if options.initStyling? 
-      $(@).children('li').css
-        'float': 'left'
-      $(@).find('*').css
-        'max-width': '100%'
-        'max-height': '100%'
-      $(@).find('img').css
-        width: '100%'
-      
-      if options.imgTargetHeight? and options.liWidths?
-        $(@).children('li').each (i) ->
-          $(@).find('img').height options.imgTargetHeight
-          $(@).width options.liWidths[i]
-    
-    # Removes the fillwidth functionality completely. Returns the element back to it's state
-    destroy: ->
-      $(window).unbind 'resize.fillwidth'
-      @each ->
-        $(@).removeData('fillwidth.rows')
-    
-    # Combines all of the magic and lines the lis up
-    lineUp: ->
-      
-      # Unfreeze the container and reset the list items
-      if $(@).data('fillwidth.rows')?
-        row.reset() for row in $(@).data 'fillwidth.rows'
-      $(@).width 'auto'
-      
-      # Get the new container width and store the new rows, then re-freeze
-      frameWidth = $(@).width()
-      $(@).data 'fillwidth.rows', methods.breakUpIntoRows.apply @
-      $(@).width frameWidth
-      
-      # Go through each row and try various things to line up
-      rows = $(@).data('fillwidth.rows')
-      for row in rows
-        row.removeMargin()
-        row.resizeHeight()
-        row.resizeLandscapes()
-        row.fillLeftoverPixels() unless row is rows[rows.length - 1] and not options.fillLastRow
-        row.lockHeight()
-        row.updateDOM()
-        
-      methods.firefoxScrollbarBug.apply @
-    
-    # Returns the current in-memory row objects
-    rows: -> $(@).data 'fillwidth.rows'
-     
-    # Determine which set of lis go over the edge of the container, and store their 
-    # { width, height, el, etc.. } in an array. Storing the width and height in objects helps run 
-    # calculations without waiting for render reflows.
-    breakUpIntoRows: ->
-      i = 0
-      rows = [new Row()]
-      $(@).children('li').each (j, li) =>
-        rows[i].lis.push new Li li
-        if rows[i].width() >= $(@).width() and j isnt $(@).children('li').length - 1
-          rows.push new Row()
-          i++
-      rows
-      
-    # Firefox work-around for ghost scrollbar bug
-    firefoxScrollbarBug: ->
-      return unless $.browser.mozilla
-      setTimeout (->
-        rows = methods.rows.apply @
-        return unless rows?
-        for row in rows[0..rows.length - 2]
-          $lastLi = row.lis[row.lis.length - 1].$el
-          diff = $(@).width() - ($lastLi.outerWidth(true) + $lastLi.position().left)
-          if diff is 24
-            for i in [1..15]
-              index = Math.round Math.random() * (row.lis.length - 1)
-              randomRow = row.lis[index]
-              randomRow.incWidth()
-            row.updateDOM()
-      ), 1
-          
-  # Either call a method if passed a string, or call init if passed an object
-  $.fn.fillwidth = (method) ->
-    if methods[method]?
-      methods[method].apply @, Array::slice.call(arguments)[1..arguments.length]
-    else if typeof method is "object" or not method?
-      methods.init.apply @, arguments
-    else
-      $.error "Method " + method + " does not exist on jQuery.fillwidth"
+  setHeight: (h) ->
+    @width = h * (@width / @height)
+    @height = h
   
-) jQuery
+  setWidth: (w) ->
+    @height = w * (@height / @width)
+    @width = w
+    
+  decWidth: -> @setWidth @width - 1
+  
+  decHeight: -> @setHeight @height - 1
+  
+  incWidth: -> @setWidth @width + 1
+    
+  incHeight: -> @setHeight @height + 1
+  
+  updateDOM: ->
+    @$el.width @width
+    @$el.height @height
+    @$el.css 'margin-right': @margin
+  
+  reset: ->
+    @width = @originalWidth
+    @height = @originalHeight
+    @margin = @originalMargin
+    @$el.css 
+      "margin-right": @originalMargin
+      width: @originalWidth
+      height: @height
+    
+class Row
+  
+  constructor: (@frameWidth, @settings) ->
+    @lis = []
+  
+  width: ->
+    width = 0
+    width += (li.width + li.margin) for li in @lis
+    width
+    
+  updateDOM: ->
+    li.updateDOM() for li in @lis
+    
+  # Resets the styling of the lis to be able to run calculations on a clean slate
+  reset: -> li.reset() for li in @lis
+    
+  # Get an array of groups of landscapes in order of @settings.landscapeRatios
+  # e.g. [[li,li],[li,li,li]]
+  landscapeGroups: ->
+    landscapeGroups = []
+    for i, ratio of @settings.landscapeRatios
+      ratio = @settings.landscapeRatios[i]
+      landscapes = (li for li in @lis when li.imgRatio >= ratio)
+      landscapeGroups.push landscapes
+    landscapeGroups
+    
+  # Resize the landscape's height so that it fits the frame
+  resizeLandscapes: ->
+    for landscapes in @landscapeGroups(@settings.landscapeRatios)
+      continue if landscapes.length is 0
+      
+      # Reduce the landscapes until we are within the frame or beyond our threshold
+      for i in [1..@settings.landscapeRatios]
+        li.decHeight() for li in landscapes
+        break if @width() <= @frameWidth
+      break if @width() <= @frameWidth
+    @
+  
+  # Resize the entire row height by a maximum ammount in an attempt make the margins
+  resizeHeight: ->
+    i = 0
+    while @width() > @frameWidth and i < @settings.resizeRowBy
+      i++
+      li.decHeight() for li in @lis
+  
+  # Round off all of the li's width
+  roundOff: ->
+    li.setWidth(Math.floor li.width) for li in @lis 
+  
+  # Arbitrarily extend lis to fill in any pixels that got rounded off
+  fillLeftoverPixels: ->
+    @roundOff()
+    diff = => @frameWidth - @width()
+    
+    while diff() isnt 0
+      randIndex = Math.round Math.random() * (@lis.length - 1)
+      if diff() < 0
+        @lis[randIndex].decWidth()  
+      else
+        @lis[randIndex].incWidth()
+      
+  # Removes the right margin from the last row element
+  removeMargin: ->
+    lastLi = @lis[@lis.length - 1]
+    lastLi.margin = 0
+    
+  # Make sure all of the lis are the same height (the tallest li in the group)
+  lockHeight: ->
+    tallestHeight = Math.floor (@lis.sort (a, b) -> b.height - a.height)[0].height
+    li.height = tallestHeight for li in @lis
+  
+  # Go through the lis and hide them
+  hide: -> li.$el.hide() for li in @lis
+  
+  # Go through the lis and show them
+  show: -> li.$el.show() for li in @lis
+      
+# Debounce stolen from underscore.js
+# ----------------------------------
+debounce = (func, wait) ->
+  timeout = 0
+  return ->
+    args = arguments
+    throttler = =>
+      timeout = null
+      func args
+
+    clearTimeout timeout
+    timeout = setTimeout(throttler, wait)
+
+# Methods
+# -------
+methods =
+  
+  # Called on initialization of the plugin
+  init: (settings) ->
+    @settings = $.extend(
+      resizeLandscapesBy: 200
+      resizeRowBy: 15
+      landscapeRatios: (i / 10 for i in [10..50] by 3).reverse()
+      fillLastRow: false
+      beforeFillWidth: null
+      afterFillWidth: null
+    , settings)
+    
+    @each (i, el) =>
+      methods.initStyling.call @, el
+      
+      # Decide to run fillWidth after all of the child images have loaded, or before hand depending
+      # on whether the @settings to do the latter have been specified.
+      # TODO: Refactor out these locally declared functions
+      initFillWidth = =>
+        fillWidth = => 
+          methods.fillWidth.call @, el
+        fillWidth()
+        $(window).bind 'resize', debounce fillWidth, 300
+      $imgs = $(el).find('img')
+      
+      if @settings.imgTargetHeight? and @settings.liWidths?
+        initFillWidth()
+        $imgs.load -> $(@).height('auto')
+      else
+        imagesToLoad = $imgs.length
+        $imgs.load ->
+          imagesToLoad--
+          initFillWidth() if imagesToLoad is 0
+        
+  # Initial styling applied to the element to get lis to line up horizontally and images to be 
+  # contained well in them.
+  initStyling: (el) ->
+    
+    $(el).css
+      'list-style': 'none'
+      padding: 0
+      margin: 0
+      overflow: 'hidden'
+    $(el).css @settings.initStyling if @settings.initStyling? 
+    $(el).children('li').css
+      'float': 'left'
+      'margin-left': 0
+    $(el).find('*').css
+      'max-width': '100%'
+      'max-height': '100%'
+    $(el).find('img').css
+      width: '100%'
+    
+    if @settings and @settings.imgTargetHeight? and @settings.liWidths?
+      $(el).children('li').each (i, el) =>
+        $(el).find('img').height @settings.imgTargetHeight
+        $(el).width @settings.liWidths[i]
+  
+  # Removes the fillwidth functionality completely. Returns the element back to it's state
+  destroy: ->
+    $(window).unbind 'resize.fillwidth'
+    @each ->
+      $(@).removeData('fillwidth.rows')
+  
+  # Combines all of the magic and lines the lis up
+  fillWidth: (el) ->
+    
+    @settings.beforeFillWidth() if @settings.beforeFillWidth?
+    
+    # Unfreeze the container and reset the list items
+    if $(el).data('fillwidth.rows')?
+      row.reset() for row in $(el).data 'fillwidth.rows'
+    $(el).width 'auto'
+    
+    # Get the new container width and store the new rows, then re-freeze
+    @frameWidth = $(el).width()
+    rows = methods.breakUpIntoRows.call @, el
+    $(el).data 'fillwidth.rows', rows
+    $(el).width @frameWidth
+    
+    # Go through each row and try various things to line up
+    rows = $(el).data('fillwidth.rows')
+    for row in rows
+      row.removeMargin()
+      row.resizeHeight()
+      row.resizeLandscapes(@settings.landscapeRatios)
+      row.fillLeftoverPixels() unless row is rows[rows.length - 1] and not @settings.fillLastRow
+      row.lockHeight()
+      row.updateDOM()
+      
+    methods.firefoxScrollbarBug.call @, el
+    
+    @settings.afterFillWidth() if @settings.afterFillWidth?
+  
+  # Returns the current in-memory row objects
+  rowObjs: -> 
+    arr = []
+    @each ->
+      arr.push $(@).data 'fillwidth.rows'
+    arr = arr[0] if arr.length is 1
+    arr
+    
+  # Returns an array of groups of li elements that make up a row
+  rows: ->
+    rows = methods.rowObjs.call @
+    arr = []
+    for row in rows
+      arr.push (li.$el for li in row.lis)
+    arr = arr[0] if arr.length is 1
+    arr
+    
+  # Determine which set of lis go over the edge of the container, and store their 
+  # { width, height, el, etc.. } in an array. Storing the width and height in objects helps run 
+  # calculations without waiting for render reflows.
+  breakUpIntoRows: (el) ->
+    i = 0
+    rows = [new Row(@frameWidth, @settings)]
+    $(el).children('li').each (j, li) =>
+      rows[i].lis.push new Li li
+      if rows[i].width() >= $(el).width() and j isnt $(el).children('li').length - 1
+        rows.push new Row(@frameWidth, @settings)
+        i++
+    rows
+    
+  # Firefox work-around for ghost scrollbar bug
+  firefoxScrollbarBug: (el) ->
+    return unless $.browser.mozilla
+    setTimeout (->
+      rows = $(el).data 'fillwidth.rows'
+      return unless rows?
+      for row in rows[0..rows.length - 2]
+        $lastLi = row.lis[row.lis.length - 1].$el
+        diff = $(el).width() - ($lastLi.outerWidth(true) + $lastLi.position().left)
+        if diff is 24
+          for i in [1..15]
+            index = Math.round Math.random() * (row.lis.length - 1)
+            randomRow = row.lis[index]
+            randomRow.incWidth()
+          row.updateDOM()
+    ), 1
+        
+# Either call a method if passed a string, or call init if passed an object
+$.fn.fillwidth = (method) ->
+  if methods[method]?
+    methods[method].apply @, Array::slice.call(arguments, 1)
+  else if typeof method is "object" or not method?
+    methods.init.apply @, arguments
+  else
+    $.error "Method #{method} does not exist on jQuery.fillwidth"
