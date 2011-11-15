@@ -110,33 +110,14 @@
       return landscapeGroups;
     };
     Row.prototype.resizeLandscapes = function() {
-      var i, landscape, landscapes, li, nonEmptyLandscapes, _i, _j, _k, _l, _len, _len2, _len3, _len4, _ref, _ref2;
-      nonEmptyLandscapes = (function() {
-        var _i, _len, _ref, _results;
-        _ref = this.landscapeGroups(this.settings.landscapeRatios);
-        _results = [];
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          landscapes = _ref[_i];
-          if (landscapes.length !== 0) {
-            _results.push(landscapes);
-          }
-        }
-        return _results;
-      }).call(this);
-      for (_i = 0, _len = nonEmptyLandscapes.length; _i < _len; _i++) {
-        landscapes = nonEmptyLandscapes[_i];
-        for (_j = 0, _len2 = landscapes.length; _j < _len2; _j++) {
-          landscape = landscapes[_j];
-          console.log(landscape.$el);
-        }
-      }
+      var i, landscapes, li, _i, _j, _len, _len2, _ref, _ref2;
       _ref = this.landscapeGroups(this.settings.landscapeRatios);
-      for (_k = 0, _len3 = _ref.length; _k < _len3; _k++) {
-        landscapes = _ref[_k];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        landscapes = _ref[_i];
         if (landscapes.length !== 0) {
           for (i = 0, _ref2 = this.settings.resizeLandscapesBy; 0 <= _ref2 ? i <= _ref2 : i >= _ref2; 0 <= _ref2 ? i++ : i--) {
-            for (_l = 0, _len4 = landscapes.length; _l < _len4; _l++) {
-              li = landscapes[_l];
+            for (_j = 0, _len2 = landscapes.length; _j < _len2; _j++) {
+              li = landscapes[_j];
               li.decHeight();
             }
             if (this.width() <= this.frameWidth) {
@@ -273,10 +254,10 @@
             return methods.fillWidth.call(this, el);
           }, this);
           fillWidth();
-          return $(window).bind('resize', debounce(fillWidth, 300));
+          return $(window).bind('resize.fillwidth', debounce(fillWidth, 300));
         }, this);
         $imgs = $(el).find('img');
-        if ((this.settings.imgTargetHeight != null) && (this.settings.liWidths != null)) {
+        if (this.settings.liWidths != null) {
           initFillWidth();
           return $imgs.load(function() {
             return $(this).height('auto');
@@ -310,12 +291,8 @@
         'max-width': '100%',
         'max-height': '100%'
       });
-      $(el).find('img').css({
-        width: '100%'
-      });
-      if (this.settings && (this.settings.imgTargetHeight != null) && (this.settings.liWidths != null)) {
+      if (this.settings && (this.settings.liWidths != null)) {
         return $(el).children('li').each(__bind(function(i, el) {
-          $(el).find('img').height(this.settings.imgTargetHeight);
           return $(el).width(this.settings.liWidths[i]);
         }, this));
       }
@@ -323,11 +300,17 @@
     destroy: function() {
       $(window).unbind('resize.fillwidth');
       return this.each(function() {
+        var row, _i, _len, _ref;
+        _ref = $(this).fillwidth('rowObjs');
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          row = _ref[_i];
+          row.reset();
+        }
         return $(this).removeData('fillwidth.rows');
       });
     },
     fillWidth: function(el) {
-      var row, rows, _i, _j, _len, _len2, _ref;
+      var margin, max, min, row, rows, width, _i, _j, _len, _len2, _ref, _ref2, _ref3;
       if (this.settings.beforeFillWidth != null) {
         this.settings.beforeFillWidth();
       }
@@ -339,11 +322,25 @@
         }
       }
       $(el).width('auto');
+      if (this.settings.marginBreakPoints != null) {
+        _ref2 = this.settings.marginBreakPoints;
+        for (width in _ref2) {
+          margin = _ref2[width];
+          min = parseInt(width.split('-')[0]);
+          max = parseInt(width.split('-')[1]);
+          if ((min < (_ref3 = $(window).width()) && _ref3 < max)) {
+            $(el).children().each(function() {
+              return $(this).css({
+                'margin-right': margin
+              });
+            });
+          }
+        }
+      }
       this.frameWidth = $(el).width();
       rows = methods.breakUpIntoRows.call(this, el);
       $(el).data('fillwidth.rows', rows);
       $(el).width(this.frameWidth);
-      rows = $(el).data('fillwidth.rows');
       for (_j = 0, _len2 = rows.length; _j < _len2; _j++) {
         row = rows[_j];
         row.removeMargin();

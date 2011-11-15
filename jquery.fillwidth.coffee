@@ -80,10 +80,6 @@ class Row
     
   # Resize the landscape's height so that it fits the frame
   resizeLandscapes: ->
-    nonEmptyLandscapes = (landscapes for landscapes in @landscapeGroups(@settings.landscapeRatios) when landscapes.length isnt 0)
-    for landscapes in nonEmptyLandscapes
-      console.log landscape.$el for landscape in landscapes
-    
     for landscapes in @landscapeGroups(@settings.landscapeRatios) when landscapes.length isnt 0
       
       # Reduce the landscapes until we are within the frame or beyond our threshold
@@ -170,10 +166,10 @@ methods =
         fillWidth = => 
           methods.fillWidth.call @, el
         fillWidth()
-        $(window).bind 'resize', debounce fillWidth, 300
+        $(window).bind 'resize.fillwidth', debounce fillWidth, 300
       $imgs = $(el).find('img')
       
-      if @settings.imgTargetHeight? and @settings.liWidths?
+      if @settings.liWidths?
         initFillWidth()
         $imgs.load -> $(@).height('auto')
       else
@@ -198,18 +194,16 @@ methods =
     $(el).find('*').css
       'max-width': '100%'
       'max-height': '100%'
-    $(el).find('img').css
-      width: '100%'
     
-    if @settings and @settings.imgTargetHeight? and @settings.liWidths?
+    if @settings and @settings.liWidths?
       $(el).children('li').each (i, el) =>
-        $(el).find('img').height @settings.imgTargetHeight
         $(el).width @settings.liWidths[i]
   
   # Removes the fillwidth functionality completely. Returns the element back to it's state
   destroy: ->
     $(window).unbind 'resize.fillwidth'
     @each ->
+      row.reset() for row in $(@).fillwidth('rowObjs')
       $(@).removeData('fillwidth.rows')
   
   # Combines all of the magic and lines the lis up
@@ -222,6 +216,14 @@ methods =
       row.reset() for row in $(el).data 'fillwidth.rows'
     $(el).width 'auto'
     
+    # If margin breakpoints are specified adjust the element margins to the screen size
+    if @settings.marginBreakPoints?
+      for width, margin of @settings.marginBreakPoints 
+        min = parseInt width.split('-')[0]
+        max = parseInt width.split('-')[1]
+        if min < $(window).width() < max
+          $(el).children().each -> $(@).css 'margin-right': margin
+    
     # Get the new container width and store the new rows, then re-freeze
     @frameWidth = $(el).width()
     rows = methods.breakUpIntoRows.call @, el
@@ -229,7 +231,6 @@ methods =
     $(el).width @frameWidth
     
     # Go through each row and try various things to line up
-    rows = $(el).data('fillwidth.rows')
     for row in rows
       row.removeMargin()
       row.resizeHeight()
