@@ -11,6 +11,15 @@
 # 
 $ = jQuery
 
+# Defaults
+_defaults =
+  resizeLandscapesBy: 200
+  resizeRowBy: 15
+  landscapeRatios: (i / 10 for i in [10..50] by 3).reverse()
+  fillLastRow: false
+  beforeFillWidth: null
+  afterFillWidth: null
+
 # In memory row and li objects
 # ----------------------------
 class Li
@@ -30,7 +39,7 @@ class Li
   setWidth: (w) ->
     @height = w * (@height / @width)
     @width = w
-    
+  
   decWidth: -> @setWidth @width - 1
   
   decHeight: -> @setHeight @height - 1
@@ -89,6 +98,14 @@ class Row
       break if @width() <= @frameWidth
     @
   
+  # Adjust the margins between list items to try an reach the frame
+  adjustMargins: ->
+    for i in [0..@settings.adjustMarginsBy]
+      for li in @lis[0..@lis.length - 2]
+        li.margin--
+        break if @width() <= @frameWidth
+      break if @width() <= @frameWidth
+  
   # Resize the entire row height by a maximum ammount in an attempt make the margins
   resizeHeight: ->
     i = 0
@@ -98,7 +115,7 @@ class Row
   
   # Round off all of the li's width
   roundOff: ->
-    li.setWidth(Math.floor li.width) for li in @lis 
+    li.setWidth(Math.floor li.width) for li in @lis
   
   # Arbitrarily extend lis to fill in any pixels that got rounded off
   fillLeftoverPixels: ->
@@ -147,14 +164,7 @@ methods =
   
   # Called on initialization of the plugin
   init: (settings) ->
-    @settings = $.extend(
-      resizeLandscapesBy: 200
-      resizeRowBy: 15
-      landscapeRatios: (i / 10 for i in [10..50] by 3).reverse()
-      fillLastRow: false
-      beforeFillWidth: null
-      afterFillWidth: null
-    , settings)
+    @settings = $.extend _defaults, settings
     
     @each (i, el) =>
       methods.initStyling.call @, el
@@ -234,6 +244,7 @@ methods =
     for row in rows
       row.removeMargin()
       row.resizeHeight()
+      row.adjustMargins()
       row.resizeLandscapes()
       row.fillLeftoverPixels() unless row is rows[rows.length - 1] and not @settings.fillLastRow
       row.lockHeight()

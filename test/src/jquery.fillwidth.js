@@ -1,7 +1,22 @@
 (function() {
-  var $, Li, Row, debounce, methods;
+  var $, Li, Row, debounce, i, methods, _defaults;
   var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
   $ = jQuery;
+  _defaults = {
+    resizeLandscapesBy: 200,
+    resizeRowBy: 15,
+    landscapeRatios: ((function() {
+      var _results;
+      _results = [];
+      for (i = 10; i <= 50; i += 3) {
+        _results.push(i / 10);
+      }
+      return _results;
+    })()).reverse(),
+    fillLastRow: false,
+    beforeFillWidth: null,
+    afterFillWidth: null
+  };
   Li = (function() {
     function Li(el) {
       var $img;
@@ -131,8 +146,26 @@
       }
       return this;
     };
+    Row.prototype.adjustMargins = function() {
+      var i, li, _i, _len, _ref, _ref2, _results;
+      _results = [];
+      for (i = 0, _ref = this.settings.adjustMarginsBy; 0 <= _ref ? i <= _ref : i >= _ref; 0 <= _ref ? i++ : i--) {
+        _ref2 = this.lis.slice(0, (this.lis.length - 2 + 1) || 9e9);
+        for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+          li = _ref2[_i];
+          li.margin--;
+          if (this.width() <= this.frameWidth) {
+            break;
+          }
+        }
+        if (this.width() <= this.frameWidth) {
+          break;
+        }
+      }
+      return _results;
+    };
     Row.prototype.resizeHeight = function() {
-      var i, li, _results;
+      var li, _results;
       i = 0;
       _results = [];
       while (this.width() > this.frameWidth && i < this.settings.resizeRowBy) {
@@ -229,22 +262,7 @@
   };
   methods = {
     init: function(settings) {
-      var i;
-      this.settings = $.extend({
-        resizeLandscapesBy: 200,
-        resizeRowBy: 15,
-        landscapeRatios: ((function() {
-          var _results;
-          _results = [];
-          for (i = 10; i <= 50; i += 3) {
-            _results.push(i / 10);
-          }
-          return _results;
-        })()).reverse(),
-        fillLastRow: false,
-        beforeFillWidth: null,
-        afterFillWidth: null
-      }, settings);
+      this.settings = $.extend(_defaults, settings);
       return this.each(__bind(function(i, el) {
         var $imgs, imagesToLoad, initFillWidth;
         methods.initStyling.call(this, el);
@@ -345,6 +363,7 @@
         row = rows[_j];
         row.removeMargin();
         row.resizeHeight();
+        row.adjustMargins();
         row.resizeLandscapes();
         if (!(row === rows[rows.length - 1] && !this.settings.fillLastRow)) {
           row.fillLeftoverPixels();
@@ -391,7 +410,7 @@
       return arr;
     },
     breakUpIntoRows: function(el) {
-      var i, rows;
+      var rows;
       i = 0;
       rows = [new Row(this.frameWidth, this.settings)];
       $(el).children('li').each(__bind(function(j, li) {
