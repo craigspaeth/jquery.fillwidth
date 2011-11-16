@@ -11,15 +11,6 @@
 # 
 $ = jQuery
 
-# Defaults
-_defaults =
-  resizeLandscapesBy: 200
-  resizeRowBy: 15
-  landscapeRatios: (i / 10 for i in [10..50] by 3).reverse()
-  fillLastRow: false
-  beforeFillWidth: null
-  afterFillWidth: null
-
 # In memory row and li objects
 # ----------------------------
 class Li
@@ -164,6 +155,15 @@ methods =
   
   # Called on initialization of the plugin
   init: (settings) ->
+    
+    # Settings
+    _defaults =
+      resizeLandscapesBy: 200
+      resizeRowBy: 15
+      landscapeRatios: (i / 10 for i in [10..50] by 3).reverse()
+      fillLastRow: false
+      beforeFillWidth: null
+      afterFillWidth: null
     @settings = $.extend _defaults, settings
     
     @each (i, el) =>
@@ -244,7 +244,7 @@ methods =
     for row in rows
       row.removeMargin()
       row.resizeHeight()
-      row.adjustMargins()
+      row.adjustMargins() if @settings.adjustMarginsBy
       row.resizeLandscapes()
       row.fillLeftoverPixels() unless row is rows[rows.length - 1] and not @settings.fillLastRow
       row.lockHeight()

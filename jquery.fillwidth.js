@@ -1,22 +1,7 @@
 (function() {
-  var $, Li, Row, debounce, i, methods, _defaults;
+  var $, Li, Row, debounce, methods;
   var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
   $ = jQuery;
-  _defaults = {
-    resizeLandscapesBy: 200,
-    resizeRowBy: 15,
-    landscapeRatios: ((function() {
-      var _results;
-      _results = [];
-      for (i = 10; i <= 50; i += 3) {
-        _results.push(i / 10);
-      }
-      return _results;
-    })()).reverse(),
-    fillLastRow: false,
-    beforeFillWidth: null,
-    afterFillWidth: null
-  };
   Li = (function() {
     function Li(el) {
       var $img;
@@ -165,7 +150,7 @@
       return _results;
     };
     Row.prototype.resizeHeight = function() {
-      var li, _results;
+      var i, li, _results;
       i = 0;
       _results = [];
       while (this.width() > this.frameWidth && i < this.settings.resizeRowBy) {
@@ -262,6 +247,22 @@
   };
   methods = {
     init: function(settings) {
+      var i, _defaults;
+      _defaults = {
+        resizeLandscapesBy: 200,
+        resizeRowBy: 15,
+        landscapeRatios: ((function() {
+          var _results;
+          _results = [];
+          for (i = 10; i <= 50; i += 3) {
+            _results.push(i / 10);
+          }
+          return _results;
+        })()).reverse(),
+        fillLastRow: false,
+        beforeFillWidth: null,
+        afterFillWidth: null
+      };
       this.settings = $.extend(_defaults, settings);
       return this.each(__bind(function(i, el) {
         var $imgs, imagesToLoad, initFillWidth;
@@ -363,7 +364,9 @@
         row = rows[_j];
         row.removeMargin();
         row.resizeHeight();
-        row.adjustMargins();
+        if (this.settings.adjustMarginsBy) {
+          row.adjustMargins();
+        }
         row.resizeLandscapes();
         if (!(row === rows[rows.length - 1] && !this.settings.fillLastRow)) {
           row.fillLeftoverPixels();
@@ -410,7 +413,7 @@
       return arr;
     },
     breakUpIntoRows: function(el) {
-      var rows;
+      var i, rows;
       i = 0;
       rows = [new Row(this.frameWidth, this.settings)];
       $(el).children('li').each(__bind(function(j, li) {
