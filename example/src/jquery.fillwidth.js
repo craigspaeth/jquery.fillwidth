@@ -329,7 +329,7 @@
       });
     },
     fillWidth: function(el) {
-      var margin, max, min, row, rows, width, _i, _j, _len, _len2, _ref, _ref2, _ref3;
+      var row, rows, _i, _j, _len, _len2, _ref;
       if (this.settings.beforeFillWidth != null) {
         this.settings.beforeFillWidth();
       }
@@ -341,30 +341,21 @@
         }
       }
       $(el).width('auto');
-      if (this.settings.marginBreakPoints != null) {
-        _ref2 = this.settings.marginBreakPoints;
-        for (width in _ref2) {
-          margin = _ref2[width];
-          min = parseInt(width.split('-')[0]);
-          max = parseInt(width.split('-')[1]);
-          if ((min < (_ref3 = $(window).width()) && _ref3 < max)) {
-            $(el).children().each(function() {
-              return $(this).css({
-                'margin-right': margin
-              });
-            });
-          }
-        }
+      if (this.settings.beforeNewRows != null) {
+        this.settings.beforeNewRows();
       }
       this.frameWidth = $(el).width();
       rows = methods.breakUpIntoRows.call(this, el);
       $(el).data('fillwidth.rows', rows);
       $(el).width(this.frameWidth);
+      if (this.settings.afterNewRows != null) {
+        this.settings.afterNewRows();
+      }
       for (_j = 0, _len2 = rows.length; _j < _len2; _j++) {
         row = rows[_j];
         row.removeMargin();
         row.resizeHeight();
-        if (this.settings.adjustMarginsBy) {
+        if (this.settings.adjustMarginsBy != null) {
           row.adjustMargins();
         }
         row.resizeLandscapes();

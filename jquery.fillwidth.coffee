@@ -191,7 +191,6 @@ methods =
   # Initial styling applied to the element to get lis to line up horizontally and images to be 
   # contained well in them.
   initStyling: (el) ->
-    
     $(el).css
       'list-style': 'none'
       padding: 0
@@ -221,30 +220,26 @@ methods =
     
     @settings.beforeFillWidth() if @settings.beforeFillWidth?
     
-    # Unfreeze the container and reset the list items
+    # Reset the list items & unfreeze the container 
     if $(el).data('fillwidth.rows')?
       row.reset() for row in $(el).data 'fillwidth.rows'
     $(el).width 'auto'
     
-    # If margin breakpoints are specified adjust the element margins to the screen size
-    if @settings.marginBreakPoints?
-      for width, margin of @settings.marginBreakPoints 
-        min = parseInt width.split('-')[0]
-        max = parseInt width.split('-')[1]
-        if min < $(window).width() < max
-          $(el).children().each -> $(@).css 'margin-right': margin
+    @settings.beforeNewRows() if @settings.beforeNewRows?
     
-    # Get the new container width and store the new rows, then re-freeze
+    # Store the new row in-memory objects and re-freeze the container
     @frameWidth = $(el).width()
     rows = methods.breakUpIntoRows.call @, el
     $(el).data 'fillwidth.rows', rows
     $(el).width @frameWidth
+              
+    @settings.afterNewRows() if @settings.afterNewRows?
     
     # Go through each row and try various things to line up
     for row in rows
       row.removeMargin()
       row.resizeHeight()
-      row.adjustMargins() if @settings.adjustMarginsBy
+      row.adjustMargins() if @settings.adjustMarginsBy?
       row.resizeLandscapes()
       row.fillLeftoverPixels() unless row is rows[rows.length - 1] and not @settings.fillLastRow
       row.lockHeight()
