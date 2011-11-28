@@ -11,21 +11,26 @@
 # 
 $ = jQuery
 
+# Plugin globals
+totalPlugins = 0
+callQueue = []
+
 # In memory row and li objects
 # ----------------------------
 class Li
   
-  constructor: (el) ->
+  constructor: (el, settings) ->
     @originalWidth = @width = $(el).outerWidth()
-    @originalHeight = @height = $(el).outerHeight()
+    @originalHeight = @height = $(el).height()
     @originalMargin = @margin = $(el).outerWidth(true) - $(el).outerWidth()
     $img = $(el).find('img')
     @imgRatio = $img.width() / $img.height()
     @$el = $(el)
+    @settings = settings
     
   setHeight: (h) ->
     @width = h * (@width / @height)
-    @height = h
+    @height = h unless @settings.lockedHeight # comment if locked height
   
   setWidth: (w) ->
     @height = w * (@height / @width)
@@ -127,7 +132,8 @@ class Row
     
   # Make sure all of the lis are the same height (the tallest li in the group)
   lockHeight: ->
-    tallestHeight = Math.floor (@lis.sort (a, b) -> b.height - a.height)[0].height
+    tallestLi = (@lis.sort (a, b) -> b.height - a.height)[0]
+    tallestHeight = Math.ceil tallestLi.height
     li.height = tallestHeight for li in @lis
   
   # Go through the lis and hide them
@@ -171,12 +177,16 @@ methods =
       
       # Decide to run fillWidth after all of the child images have loaded, or before hand depending
       # on whether the @settings to do the latter have been specified.
-      # TODO: Refactor out these locally declared functions
       initFillWidth = =>
-        fillWidth = => 
-          methods.fillWidth.call @, el
-        fillWidth()
-        $(window).bind 'resize.fillwidth', debounce fillWidth, 300
+        methods.fillWidth.call @, el
+        $(window).bind 'resize.fillwidth', debounce (=>
+          callQueue.push (=> methods.fillWidth.call @, el)
+          if callQueue.length is totalPlugins
+            fn() for fn in callQueue
+            callQueue = []
+        ), 300
+        totalPlugins++
+        
       $imgs = $(el).find('img')
       
       if @settings.liWidths?
@@ -218,6 +228,7 @@ methods =
   # Combines all of the magic and lines the lis up
   fillWidth: (el) ->
     
+    $(el).trigger 'fillwidth.beforeFillWidth'
     @settings.beforeFillWidth() if @settings.beforeFillWidth?
     
     # Reset the list items & unfreeze the container 
@@ -225,6 +236,7 @@ methods =
       row.reset() for row in $(el).data 'fillwidth.rows'
     $(el).width 'auto'
     
+    $(el).trigger 'fillwidth.beforeNewRows'
     @settings.beforeNewRows() if @settings.beforeNewRows?
     
     # Store the new row in-memory objects and re-freeze the container
@@ -232,11 +244,13 @@ methods =
     rows = methods.breakUpIntoRows.call @, el
     $(el).data 'fillwidth.rows', rows
     $(el).width @frameWidth
-              
+    
+    $(el).trigger 'fillwidth.afterNewRows'
     @settings.afterNewRows() if @settings.afterNewRows?
     
     # Go through each row and try various things to line up
     for row in rows
+      continue unless row.lis.length > 1
       row.removeMargin()
       row.resizeHeight()
       row.adjustMargins() if @settings.adjustMarginsBy?
@@ -247,6 +261,7 @@ methods =
       
     methods.firefoxScrollbarBug.call @, el
     
+    $(el).trigger 'fillwidth.afterFillWidth'
     @settings.afterFillWidth() if @settings.afterFillWidth?
   
   # Returns the current in-memory row objects
@@ -273,7 +288,8 @@ methods =
     i = 0
     rows = [new Row(@frameWidth, @settings)]
     $(el).children('li').each (j, li) =>
-      rows[i].lis.push new Li li
+      return if $(li).is(':hidden')
+      rows[i].lis.push new Li li, @settings
       if rows[i].width() >= $(el).width() and j isnt $(el).children('li').length - 1
         rows.push new Row(@frameWidth, @settings)
         i++

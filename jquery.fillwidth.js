@@ -1,20 +1,25 @@
 (function() {
-  var $, Li, Row, debounce, methods;
+  var $, Li, Row, callQueue, debounce, methods, totalPlugins;
   var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
   $ = jQuery;
+  totalPlugins = 0;
+  callQueue = [];
   Li = (function() {
-    function Li(el) {
+    function Li(el, settings) {
       var $img;
       this.originalWidth = this.width = $(el).outerWidth();
-      this.originalHeight = this.height = $(el).outerHeight();
+      this.originalHeight = this.height = $(el).height();
       this.originalMargin = this.margin = $(el).outerWidth(true) - $(el).outerWidth();
       $img = $(el).find('img');
       this.imgRatio = $img.width() / $img.height();
       this.$el = $(el);
+      this.settings = settings;
     }
     Li.prototype.setHeight = function(h) {
       this.width = h * (this.width / this.height);
-      return this.height = h;
+      if (!this.settings.lockedHeight) {
+        return this.height = h;
+      }
     };
     Li.prototype.setWidth = function(w) {
       this.height = w * (this.height / this.width);
@@ -197,10 +202,11 @@
       return lastLi.margin = 0;
     };
     Row.prototype.lockHeight = function() {
-      var li, tallestHeight, _i, _len, _ref, _results;
-      tallestHeight = Math.floor((this.lis.sort(function(a, b) {
+      var li, tallestHeight, tallestLi, _i, _len, _ref, _results;
+      tallestLi = (this.lis.sort(function(a, b) {
         return b.height - a.height;
-      }))[0].height);
+      }))[0];
+      tallestHeight = Math.ceil(tallestLi.height);
       _ref = this.lis;
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -268,12 +274,21 @@
         var $imgs, imagesToLoad, initFillWidth;
         methods.initStyling.call(this, el);
         initFillWidth = __bind(function() {
-          var fillWidth;
-          fillWidth = __bind(function() {
-            return methods.fillWidth.call(this, el);
-          }, this);
-          fillWidth();
-          return $(window).bind('resize.fillwidth', debounce(fillWidth, 300));
+          methods.fillWidth.call(this, el);
+          $(window).bind('resize.fillwidth', debounce((__bind(function() {
+            var fn, _i, _len;
+            callQueue.push((__bind(function() {
+              return methods.fillWidth.call(this, el);
+            }, this)));
+            if (callQueue.length === totalPlugins) {
+              for (_i = 0, _len = callQueue.length; _i < _len; _i++) {
+                fn = callQueue[_i];
+                fn();
+              }
+              return callQueue = [];
+            }
+          }, this)), 300));
+          return totalPlugins++;
         }, this);
         $imgs = $(el).find('img');
         if (this.settings.liWidths != null) {
@@ -330,6 +345,7 @@
     },
     fillWidth: function(el) {
       var row, rows, _i, _j, _len, _len2, _ref;
+      $(el).trigger('fillwidth.beforeFillWidth');
       if (this.settings.beforeFillWidth != null) {
         this.settings.beforeFillWidth();
       }
@@ -341,6 +357,7 @@
         }
       }
       $(el).width('auto');
+      $(el).trigger('fillwidth.beforeNewRows');
       if (this.settings.beforeNewRows != null) {
         this.settings.beforeNewRows();
       }
@@ -348,11 +365,15 @@
       rows = methods.breakUpIntoRows.call(this, el);
       $(el).data('fillwidth.rows', rows);
       $(el).width(this.frameWidth);
+      $(el).trigger('fillwidth.afterNewRows');
       if (this.settings.afterNewRows != null) {
         this.settings.afterNewRows();
       }
       for (_j = 0, _len2 = rows.length; _j < _len2; _j++) {
         row = rows[_j];
+        if (!(row.lis.length > 1)) {
+          continue;
+        }
         row.removeMargin();
         row.resizeHeight();
         if (this.settings.adjustMarginsBy != null) {
@@ -366,6 +387,7 @@
         row.updateDOM();
       }
       methods.firefoxScrollbarBug.call(this, el);
+      $(el).trigger('fillwidth.afterFillWidth');
       if (this.settings.afterFillWidth != null) {
         return this.settings.afterFillWidth();
       }
@@ -408,7 +430,10 @@
       i = 0;
       rows = [new Row(this.frameWidth, this.settings)];
       $(el).children('li').each(__bind(function(j, li) {
-        rows[i].lis.push(new Li(li));
+        if ($(li).is(':hidden')) {
+          return;
+        }
+        rows[i].lis.push(new Li(li, this.settings));
         if (rows[i].width() >= $(el).width() && j !== $(el).children('li').length - 1) {
           rows.push(new Row(this.frameWidth, this.settings));
           return i++;
