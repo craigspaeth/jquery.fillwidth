@@ -275,19 +275,21 @@
         methods.initStyling.call(this, el);
         initFillWidth = __bind(function() {
           methods.fillWidth.call(this, el);
-          $(window).bind('resize.fillwidth', debounce((__bind(function() {
-            var fn, _i, _len;
-            callQueue.push((__bind(function() {
-              return methods.fillWidth.call(this, el);
-            }, this)));
-            if (callQueue.length === totalPlugins) {
-              for (_i = 0, _len = callQueue.length; _i < _len; _i++) {
-                fn = callQueue[_i];
-                fn();
+          if (!(navigator.userAgent.match(/iPhone/i) || navigator.userAgent.match(/iPad/i) || navigator.userAgent.match(/iPod/i))) {
+            $(window).bind('resize.fillwidth', debounce((__bind(function() {
+              var fn, _i, _len;
+              callQueue.push((__bind(function() {
+                return methods.fillWidth.call(this, el);
+              }, this)));
+              if (callQueue.length === totalPlugins) {
+                for (_i = 0, _len = callQueue.length; _i < _len; _i++) {
+                  fn = callQueue[_i];
+                  fn();
+                }
+                return callQueue = [];
               }
-              return callQueue = [];
-            }
-          }, this)), 300));
+            }, this)), 300));
+          }
           return totalPlugins++;
         }, this);
         $imgs = $(el).find('img');
