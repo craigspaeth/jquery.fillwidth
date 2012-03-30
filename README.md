@@ -4,7 +4,7 @@
 
 A jQuery plugin that given a `ul` with images inside their `lis` will do some things to line them up
 so that everything fits inside their container nice and flush to the edges. It's like google image
-search but also retaining the integrity of the original images (no cropping or stretching/squishing).
+search but without cropping the image.
 
 ## Installation
 
