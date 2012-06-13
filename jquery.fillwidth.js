@@ -388,7 +388,6 @@
         row.lockHeight();
         row.updateDOM();
       }
-      methods.firefoxScrollbarBug.call(this, el);
       $(el).trigger('fillwidth.afterFillWidth');
       if (this.settings.afterFillWidth != null) {
         return this.settings.afterFillWidth();
@@ -442,36 +441,6 @@
         }
       }, this));
       return rows;
-    },
-    firefoxScrollbarBug: function(el) {
-      if (!$.browser.mozilla) {
-        return;
-      }
-      return setTimeout((function() {
-        var $lastLi, diff, i, index, randomRow, row, rows, _i, _len, _ref, _results;
-        rows = $(el).data('fillwidth.rows');
-        if (rows == null) {
-          return;
-        }
-        _ref = rows.slice(0, (rows.length - 2 + 1) || 9e9);
-        _results = [];
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          row = _ref[_i];
-          $lastLi = row.lis[row.lis.length - 1].$el;
-          diff = $(el).width() - ($lastLi.outerWidth(true) + $lastLi.position().left);
-          _results.push((function() {
-            if (diff === 24) {
-              for (i = 1; i <= 15; i++) {
-                index = Math.round(Math.random() * (row.lis.length - 1));
-                randomRow = row.lis[index];
-                randomRow.incWidth();
-              }
-              return row.updateDOM();
-            }
-          })());
-        }
-        return _results;
-      }), 1);
     }
   };
   $.fn.fillwidth = function(method) {
