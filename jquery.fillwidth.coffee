@@ -262,8 +262,6 @@ methods =
       row.lockHeight()
       row.updateDOM()
 
-    methods.firefoxScrollbarBug.call @, el
-
     $(el).trigger 'fillwidth.afterFillWidth'
     @settings.afterFillWidth() if @settings.afterFillWidth?
 
@@ -297,23 +295,6 @@ methods =
         rows.push new Row(@frameWidth, @settings)
         i++
     rows
-
-  # Firefox work-around for ghost scrollbar bug
-  firefoxScrollbarBug: (el) ->
-    return unless $.browser.mozilla
-    setTimeout (->
-      rows = $(el).data 'fillwidth.rows'
-      return unless rows?
-      for row in rows[0..rows.length - 2]
-        $lastLi = row.lis[row.lis.length - 1].$el
-        diff = $(el).width() - ($lastLi.outerWidth(true) + $lastLi.position().left)
-        if diff is 24
-          for i in [1..15]
-            index = Math.round Math.random() * (row.lis.length - 1)
-            randomRow = row.lis[index]
-            randomRow.incWidth()
-          row.updateDOM()
-    ), 1
 
 # Either call a method if passed a string, or call init if passed an object
 $.fn.fillwidth = (method) ->
