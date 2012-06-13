@@ -1,14 +1,10 @@
 (function() {
   var $, Li, Row, callQueue, debounce, methods, totalPlugins;
-
+  var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
   $ = jQuery;
-
   totalPlugins = 0;
-
   callQueue = [];
-
   Li = (function() {
-
     function Li(el, settings) {
       var $img;
       this.originalWidth = this.width = $(el).outerWidth();
@@ -19,35 +15,28 @@
       this.$el = $(el);
       this.settings = settings;
     }
-
     Li.prototype.setHeight = function(h) {
       this.width = h * (this.width / this.height);
       if (!this.settings.lockedHeight) {
         return this.height = h;
       }
     };
-
     Li.prototype.setWidth = function(w) {
       this.height = w * (this.height / this.width);
       return this.width = w;
     };
-
     Li.prototype.decWidth = function() {
       return this.setWidth(this.width - 1);
     };
-
     Li.prototype.decHeight = function() {
       return this.setHeight(this.height - 1);
     };
-
     Li.prototype.incWidth = function() {
       return this.setWidth(this.width + 1);
     };
-
     Li.prototype.incHeight = function() {
       return this.setHeight(this.height + 1);
     };
-
     Li.prototype.updateDOM = function() {
       this.$el.width(this.width);
       this.$el.height(this.height);
@@ -55,7 +44,6 @@
         'margin-right': this.margin
       });
     };
-
     Li.prototype.reset = function() {
       this.width = this.originalWidth;
       this.height = this.originalHeight;
@@ -66,19 +54,14 @@
         height: this.height
       });
     };
-
     return Li;
-
   })();
-
   Row = (function() {
-
     function Row(frameWidth, settings) {
       this.frameWidth = frameWidth;
       this.settings = settings;
       this.lis = [];
     }
-
     Row.prototype.width = function() {
       var li, width, _i, _len, _ref;
       width = 0;
@@ -89,7 +72,6 @@
       }
       return width;
     };
-
     Row.prototype.updateDOM = function() {
       var li, _i, _len, _ref, _results;
       _ref = this.lis;
@@ -100,7 +82,6 @@
       }
       return _results;
     };
-
     Row.prototype.reset = function() {
       var li, _i, _len, _ref, _results;
       _ref = this.lis;
@@ -111,7 +92,6 @@
       }
       return _results;
     };
-
     Row.prototype.landscapeGroups = function() {
       var i, landscapeGroups, landscapes, li, ratio, _ref;
       landscapeGroups = [];
@@ -119,11 +99,11 @@
       for (i in _ref) {
         ratio = _ref[i];
         landscapes = (function() {
-          var _i, _len, _ref1, _results;
-          _ref1 = this.lis;
+          var _i, _len, _ref2, _results;
+          _ref2 = this.lis;
           _results = [];
-          for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
-            li = _ref1[_i];
+          for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+            li = _ref2[_i];
             if (li.imgRatio >= ratio) {
               _results.push(li);
             }
@@ -134,38 +114,35 @@
       }
       return landscapeGroups;
     };
-
     Row.prototype.resizeLandscapes = function() {
-      var i, landscapes, li, _i, _j, _k, _len, _len1, _ref, _ref1;
+      var i, landscapes, li, _i, _j, _len, _len2, _ref, _ref2;
       _ref = this.landscapeGroups(this.settings.landscapeRatios);
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         landscapes = _ref[_i];
-        if (!(landscapes.length !== 0)) {
-          continue;
-        }
-        for (i = _j = 0, _ref1 = this.settings.resizeLandscapesBy; 0 <= _ref1 ? _j <= _ref1 : _j >= _ref1; i = 0 <= _ref1 ? ++_j : --_j) {
-          for (_k = 0, _len1 = landscapes.length; _k < _len1; _k++) {
-            li = landscapes[_k];
-            li.decHeight();
+        if (landscapes.length !== 0) {
+          for (i = 0, _ref2 = this.settings.resizeLandscapesBy; 0 <= _ref2 ? i <= _ref2 : i >= _ref2; 0 <= _ref2 ? i++ : i--) {
+            for (_j = 0, _len2 = landscapes.length; _j < _len2; _j++) {
+              li = landscapes[_j];
+              li.decHeight();
+            }
+            if (this.width() <= this.frameWidth) {
+              break;
+            }
           }
           if (this.width() <= this.frameWidth) {
             break;
           }
         }
-        if (this.width() <= this.frameWidth) {
-          break;
-        }
       }
       return this;
     };
-
     Row.prototype.adjustMargins = function() {
-      var i, li, _i, _j, _len, _ref, _ref1, _results;
+      var i, li, _i, _len, _ref, _ref2, _results;
       _results = [];
-      for (i = _i = 0, _ref = this.settings.adjustMarginsBy; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
-        _ref1 = this.lis.slice(0, (this.lis.length - 2) + 1 || 9e9);
-        for (_j = 0, _len = _ref1.length; _j < _len; _j++) {
-          li = _ref1[_j];
+      for (i = 0, _ref = this.settings.adjustMarginsBy; 0 <= _ref ? i <= _ref : i >= _ref; 0 <= _ref ? i++ : i--) {
+        _ref2 = this.lis.slice(0, (this.lis.length - 2 + 1) || 9e9);
+        for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+          li = _ref2[_i];
           li.margin--;
           if (this.width() <= this.frameWidth) {
             break;
@@ -173,13 +150,10 @@
         }
         if (this.width() <= this.frameWidth) {
           break;
-        } else {
-          _results.push(void 0);
         }
       }
       return _results;
     };
-
     Row.prototype.resizeHeight = function() {
       var i, li, _results;
       i = 0;
@@ -187,19 +161,18 @@
       while (this.width() > this.frameWidth && i < this.settings.resizeRowBy) {
         i++;
         _results.push((function() {
-          var _i, _len, _ref, _results1;
+          var _i, _len, _ref, _results2;
           _ref = this.lis;
-          _results1 = [];
+          _results2 = [];
           for (_i = 0, _len = _ref.length; _i < _len; _i++) {
             li = _ref[_i];
-            _results1.push(li.decHeight());
+            _results2.push(li.decHeight());
           }
-          return _results1;
+          return _results2;
         }).call(this));
       }
       return _results;
     };
-
     Row.prototype.roundOff = function() {
       var li, _i, _len, _ref, _results;
       _ref = this.lis;
@@ -210,32 +183,24 @@
       }
       return _results;
     };
-
     Row.prototype.fillLeftoverPixels = function() {
-      var diff, randIndex, _results,
-        _this = this;
+      var diff, randIndex, _results;
       this.roundOff();
-      diff = function() {
-        return _this.frameWidth - _this.width();
-      };
+      diff = __bind(function() {
+        return this.frameWidth - this.width();
+      }, this);
       _results = [];
       while (diff() !== 0) {
         randIndex = Math.round(Math.random() * (this.lis.length - 1));
-        if (diff() < 0) {
-          _results.push(this.lis[randIndex].decWidth());
-        } else {
-          _results.push(this.lis[randIndex].incWidth());
-        }
+        _results.push(diff() < 0 ? this.lis[randIndex].decWidth() : this.lis[randIndex].incWidth());
       }
       return _results;
     };
-
     Row.prototype.removeMargin = function() {
       var lastLi;
       lastLi = this.lis[this.lis.length - 1];
       return lastLi.margin = 0;
     };
-
     Row.prototype.lockHeight = function() {
       var li, tallestHeight, tallestLi, _i, _len, _ref, _results;
       tallestLi = (this.lis.sort(function(a, b) {
@@ -250,7 +215,6 @@
       }
       return _results;
     };
-
     Row.prototype.hide = function() {
       var li, _i, _len, _ref, _results;
       _ref = this.lis;
@@ -261,7 +225,6 @@
       }
       return _results;
     };
-
     Row.prototype.show = function() {
       var li, _i, _len, _ref, _results;
       _ref = this.lis;
@@ -272,38 +235,32 @@
       }
       return _results;
     };
-
     return Row;
-
   })();
-
   debounce = function(func, wait) {
     var timeout;
     timeout = 0;
     return function() {
-      var args, throttler,
-        _this = this;
+      var args, throttler;
       args = arguments;
-      throttler = function() {
+      throttler = __bind(function() {
         timeout = null;
         return func(args);
-      };
+      }, this);
       clearTimeout(timeout);
       return timeout = setTimeout(throttler, wait);
     };
   };
-
   methods = {
     init: function(settings) {
-      var i, _defaults,
-        _this = this;
+      var i, _defaults;
       _defaults = {
         resizeLandscapesBy: 200,
         resizeRowBy: 15,
         landscapeRatios: ((function() {
-          var _i, _results;
+          var _results;
           _results = [];
-          for (i = _i = 10; _i <= 50; i = _i += 3) {
+          for (i = 10; i <= 50; i += 3) {
             _results.push(i / 10);
           }
           return _results;
@@ -313,17 +270,17 @@
         afterFillWidth: null
       };
       this.settings = $.extend(_defaults, settings);
-      return this.each(function(i, el) {
+      return this.each(__bind(function(i, el) {
         var $imgs, imagesToLoad, initFillWidth;
-        methods.initStyling.call(_this, el);
-        initFillWidth = function() {
-          methods.fillWidth.call(_this, el);
+        methods.initStyling.call(this, el);
+        initFillWidth = __bind(function() {
+          methods.fillWidth.call(this, el);
           if (!(navigator.userAgent.match(/iPhone/i) || navigator.userAgent.match(/iPad/i) || navigator.userAgent.match(/iPod/i))) {
-            $(window).bind('resize.fillwidth', debounce((function() {
+            $(window).bind('resize.fillwidth', debounce((__bind(function() {
               var fn, _i, _len;
-              callQueue.push((function() {
-                return methods.fillWidth.call(_this, el);
-              }));
+              callQueue.push((__bind(function() {
+                return methods.fillWidth.call(this, el);
+              }, this)));
               if (callQueue.length === totalPlugins) {
                 for (_i = 0, _len = callQueue.length; _i < _len; _i++) {
                   fn = callQueue[_i];
@@ -331,12 +288,12 @@
                 }
                 return callQueue = [];
               }
-            }), 300));
+            }, this)), 300));
           }
           return totalPlugins++;
-        };
+        }, this);
         $imgs = $(el).find('img');
-        if (_this.settings.liWidths != null) {
+        if (this.settings.liWidths != null) {
           initFillWidth();
           return $imgs.load(function() {
             return $(this).height('auto');
@@ -350,10 +307,9 @@
             }
           });
         }
-      });
+      }, this));
     },
     initStyling: function(el) {
-      var _this = this;
       $(el).css({
         'list-style': 'none',
         padding: 0,
@@ -372,9 +328,9 @@
         'max-height': '100%'
       });
       if (this.settings && (this.settings.liWidths != null)) {
-        return $(el).children('li').each(function(i, el) {
-          return $(el).width(_this.settings.liWidths[i]);
-        });
+        return $(el).children('li').each(__bind(function(i, el) {
+          return $(el).width(this.settings.liWidths[i]);
+        }, this));
       }
     },
     destroy: function() {
@@ -390,7 +346,7 @@
       });
     },
     fillWidth: function(el) {
-      var row, rows, _i, _j, _len, _len1, _ref;
+      var row, rows, _i, _j, _len, _len2, _ref;
       $(el).trigger('fillwidth.beforeFillWidth');
       if (this.settings.beforeFillWidth != null) {
         this.settings.beforeFillWidth();
@@ -415,7 +371,7 @@
       if (this.settings.afterNewRows != null) {
         this.settings.afterNewRows();
       }
-      for (_j = 0, _len1 = rows.length; _j < _len1; _j++) {
+      for (_j = 0, _len2 = rows.length; _j < _len2; _j++) {
         row = rows[_j];
         if (!(row.lis.length > 1)) {
           continue;
@@ -455,10 +411,10 @@
       for (_i = 0, _len = rows.length; _i < _len; _i++) {
         row = rows[_i];
         arr.push((function() {
-          var _j, _len1, _ref, _results;
+          var _j, _len2, _ref, _results;
           _ref = row.lis;
           _results = [];
-          for (_j = 0, _len1 = _ref.length; _j < _len1; _j++) {
+          for (_j = 0, _len2 = _ref.length; _j < _len2; _j++) {
             li = _ref[_j];
             _results.push(li.$el);
           }
@@ -471,24 +427,22 @@
       return arr;
     },
     breakUpIntoRows: function(el) {
-      var i, rows,
-        _this = this;
+      var i, rows;
       i = 0;
       rows = [new Row(this.frameWidth, this.settings)];
-      $(el).children('li').each(function(j, li) {
+      $(el).children('li').each(__bind(function(j, li) {
         if ($(li).is(':hidden')) {
           return;
         }
-        rows[i].lis.push(new Li(li, _this.settings));
+        rows[i].lis.push(new Li(li, this.settings));
         if (rows[i].width() >= $(el).width() && j !== $(el).children('li').length - 1) {
-          rows.push(new Row(_this.frameWidth, _this.settings));
+          rows.push(new Row(this.frameWidth, this.settings));
           return i++;
         }
-      });
+      }, this));
       return rows;
     }
   };
-
   $.fn.fillwidth = function(method) {
     if (methods[method] != null) {
       return methods[method].apply(this, Array.prototype.slice.call(arguments, 1));
@@ -498,5 +452,4 @@
       return $.error("Method " + method + " does not exist on jQuery.fillwidth");
     }
   };
-
 }).call(this);
