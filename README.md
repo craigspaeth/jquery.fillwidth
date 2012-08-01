@@ -1,7 +1,5 @@
 # jquery.fillwidth
 
-**THIS IS CURRENTLY A WORK IN PROGRESS**
-
 A jQuery plugin that given a `ul` with images inside their `lis` will do some things to line them up
 so that everything fits inside their container nice and flush to the edges. It's like google image
 search but without cropping the image.
