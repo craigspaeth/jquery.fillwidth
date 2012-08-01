@@ -9,19 +9,12 @@ search but without cropping the image.
 Simply copy and embed jquery.fillwidth.js into your project.
 
     <script type="text/javascript" src="jquery.fillwidth.js"></script>
-  
-## Usage
-
-Fill width will try to 
 
 ## To build
 
 * Install [node](https://github.com/joyent/node/wiki/Installation)
 * Install [npm](http://npmjs.org/) `curl http://npmjs.org/install.sh | sh`
 * Install [coffeescript](http://jashkenas.github.com/coffee-script/) `npm install coffee-script`
-* Install [sentry](https://github.com/craigspaeth/sentry) `npm install sentry`
-
-Then simply run the cake command.
 
 ````
 cake build
