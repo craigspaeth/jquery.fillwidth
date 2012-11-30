@@ -20,12 +20,13 @@ callQueue = []
 class Li
 
   constructor: (el, settings) ->
-    @originalWidth = @width = $(el).outerWidth()
-    @originalHeight = @height = $(el).height()
-    @originalMargin = @margin = $(el).outerWidth(true) - $(el).outerWidth()
-    $img = $(el).find('img')
-    @imgRatio = $img.width() / $img.height()
     @$el = $(el)
+    @originalWidth = @width = @$el.outerWidth(true)
+    @originalHeight = @height = @$el.height()
+    @originalMargin = @margin = @$el.outerWidth(true) - @$el.width()
+    $img = @$el.find('img')
+    @imgRatio = $img.width() / $img.height()
+
     @settings = settings
 
   setHeight: (h) ->
@@ -65,7 +66,8 @@ class Row
 
   width: ->
     width = 0
-    width += (li.width + li.margin) for li in @lis
+    for li in @lis
+      width += (li.width + li.margin)
     width
 
   updateDOM: ->
@@ -161,7 +163,6 @@ methods =
 
   # Called on initialization of the plugin
   init: (settings) ->
-
     # Settings
     _defaults =
       resizeLandscapesBy: 200
@@ -173,24 +174,25 @@ methods =
     @settings = $.extend _defaults, settings
 
     @each (i, el) =>
-      methods.initStyling.call @, el
+      $el = $(el)
+      methods.initStyling.call @, $el
 
       # Decide to run fillWidth after all of the child images have loaded, or before hand depending
       # on whether the @settings to do the latter have been specified.
       initFillWidth = =>
-        methods.fillWidth.call @, el
-        # work around for iOS continuous resize bug
+        methods.fillWidth.call @, $el
+        # work around for iOS and IE8 continuous resize bug
         # Cause: in iOS changing document height triggers a resize event
-        unless navigator.userAgent.match(/iPhone/i) or navigator.userAgent.match(/iPad/i) or navigator.userAgent.match(/iPod/i)
+        unless navigator.userAgent.match(/iPhone/i) or navigator.userAgent.match(/iPad/i) or navigator.userAgent.match(/iPod/i) or ($.browser.msie and $.browser.version == "8.0")
           $(window).bind 'resize.fillwidth', debounce (=>
-            callQueue.push (=> methods.fillWidth.call @, el)
+            callQueue.push (=> methods.fillWidth.call @, $el)
             if callQueue.length is totalPlugins
               fn() for fn in callQueue
               callQueue = []
           ), 300
         totalPlugins++
 
-      $imgs = $(el).find('img')
+      $imgs = $el.find('img')
 
       if @settings.liWidths?
         initFillWidth()
@@ -203,22 +205,22 @@ methods =
 
   # Initial styling applied to the element to get lis to line up horizontally and images to be
   # contained well in them.
-  initStyling: (el) ->
-    $(el).css
+  initStyling: ($el) ->
+    $el.css
       'list-style': 'none'
-      padding: 0
-      margin: 0
-      overflow: 'hidden'
-    $(el).css @settings.initStyling if @settings.initStyling?
-    $(el).children('li').css
-      'float': 'left'
-      'margin-left': 0
-    $(el).find('*').css
-      'max-width': '100%'
-      'max-height': '100%'
+      padding     : 0
+      margin      : 0
+      overflow    : 'hidden'
+    $el.css @settings.initStyling if @settings.initStyling?
+    $el.children('li').css
+      'float'       : 'left'
+      'margin-left' : 0
+    $el.find('*').css
+      'max-width'   : '100%'
+      'max-height'  : '100%'
 
     if @settings and @settings.liWidths?
-      $(el).children('li').each (i, el) =>
+      $el.children('li').each (i, el) =>
         $(el).width @settings.liWidths[i]
 
   # Removes the fillwidth functionality completely. Returns the element back to it's state
@@ -229,26 +231,25 @@ methods =
       $(@).removeData('fillwidth.rows')
 
   # Combines all of the magic and lines the lis up
-  fillWidth: (el) ->
-
-    $(el).trigger 'fillwidth.beforeFillWidth'
+  fillWidth: ($el) ->
+    $el.trigger 'fillwidth.beforeFillWidth'
     @settings.beforeFillWidth() if @settings.beforeFillWidth?
 
     # Reset the list items & unfreeze the container
-    if $(el).data('fillwidth.rows')?
-      row.reset() for row in $(el).data 'fillwidth.rows'
-    $(el).width 'auto'
+    if $el.data('fillwidth.rows')?
+      row.reset() for row in $el.data 'fillwidth.rows'
+    $el.width 'auto'
 
-    $(el).trigger 'fillwidth.beforeNewRows'
+    $el.trigger 'fillwidth.beforeNewRows'
     @settings.beforeNewRows() if @settings.beforeNewRows?
 
     # Store the new row in-memory objects and re-freeze the container
-    @frameWidth = $(el).width()
-    rows = methods.breakUpIntoRows.call @, el
-    $(el).data 'fillwidth.rows', rows
-    $(el).width @frameWidth
+    @frameWidth = $el.width()
+    rows = methods.breakUpIntoRows.call @, $el
+    $el.data 'fillwidth.rows', rows
+    $el.width @frameWidth
 
-    $(el).trigger 'fillwidth.afterNewRows'
+    $el.trigger 'fillwidth.afterNewRows'
     @settings.afterNewRows() if @settings.afterNewRows?
 
     # Go through each row and try various things to line up
@@ -262,7 +263,7 @@ methods =
       row.lockHeight()
       row.updateDOM()
 
-    $(el).trigger 'fillwidth.afterFillWidth'
+    $el.trigger 'fillwidth.afterFillWidth'
     @settings.afterFillWidth() if @settings.afterFillWidth?
 
   # Returns the current in-memory row objects
@@ -285,13 +286,13 @@ methods =
   # Determine which set of lis go over the edge of the container, and store their
   # { width, height, el, etc.. } in an array. Storing the width and height in objects helps run
   # calculations without waiting for render reflows.
-  breakUpIntoRows: (el) ->
+  breakUpIntoRows: ($el) ->
     i = 0
     rows = [new Row(@frameWidth, @settings)]
-    $(el).children('li').each (j, li) =>
+    $el.children('li').each (j, li) =>
       return if $(li).is(':hidden')
       rows[i].lis.push new Li li, @settings
-      if rows[i].width() >= $(el).width() and j isnt $(el).children('li').length - 1
+      if rows[i].width() >= $el.width() and j isnt $el.children('li').length - 1
         rows.push new Row(@frameWidth, @settings)
         i++
     rows

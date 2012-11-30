@@ -7,12 +7,12 @@
   Li = (function() {
     function Li(el, settings) {
       var $img;
-      this.originalWidth = this.width = $(el).outerWidth();
-      this.originalHeight = this.height = $(el).height();
-      this.originalMargin = this.margin = $(el).outerWidth(true) - $(el).outerWidth();
-      $img = $(el).find('img');
-      this.imgRatio = $img.width() / $img.height();
       this.$el = $(el);
+      this.originalWidth = this.width = this.$el.outerWidth(true);
+      this.originalHeight = this.height = this.$el.height();
+      this.originalMargin = this.margin = this.$el.outerWidth(true) - this.$el.width();
+      $img = this.$el.find('img');
+      this.imgRatio = $img.width() / $img.height();
       this.settings = settings;
     }
     Li.prototype.setHeight = function(h) {
@@ -271,15 +271,16 @@
       };
       this.settings = $.extend(_defaults, settings);
       return this.each(__bind(function(i, el) {
-        var $imgs, imagesToLoad, initFillWidth;
-        methods.initStyling.call(this, el);
+        var $el, $imgs, imagesToLoad, initFillWidth;
+        $el = $(el);
+        methods.initStyling.call(this, $el);
         initFillWidth = __bind(function() {
-          methods.fillWidth.call(this, el);
-          if (!(navigator.userAgent.match(/iPhone/i) || navigator.userAgent.match(/iPad/i) || navigator.userAgent.match(/iPod/i))) {
+          methods.fillWidth.call(this, $el);
+          if (!(navigator.userAgent.match(/iPhone/i) || navigator.userAgent.match(/iPad/i) || navigator.userAgent.match(/iPod/i) || ($.browser.msie && $.browser.version === "8.0"))) {
             $(window).bind('resize.fillwidth', debounce((__bind(function() {
               var fn, _i, _len;
               callQueue.push((__bind(function() {
-                return methods.fillWidth.call(this, el);
+                return methods.fillWidth.call(this, $el);
               }, this)));
               if (callQueue.length === totalPlugins) {
                 for (_i = 0, _len = callQueue.length; _i < _len; _i++) {
@@ -292,7 +293,7 @@
           }
           return totalPlugins++;
         }, this);
-        $imgs = $(el).find('img');
+        $imgs = $el.find('img');
         if (this.settings.liWidths != null) {
           initFillWidth();
           return $imgs.load(function() {
@@ -309,26 +310,26 @@
         }
       }, this));
     },
-    initStyling: function(el) {
-      $(el).css({
+    initStyling: function($el) {
+      $el.css({
         'list-style': 'none',
         padding: 0,
         margin: 0,
         overflow: 'hidden'
       });
       if (this.settings.initStyling != null) {
-        $(el).css(this.settings.initStyling);
+        $el.css(this.settings.initStyling);
       }
-      $(el).children('li').css({
+      $el.children('li').css({
         'float': 'left',
         'margin-left': 0
       });
-      $(el).find('*').css({
+      $el.find('*').css({
         'max-width': '100%',
         'max-height': '100%'
       });
       if (this.settings && (this.settings.liWidths != null)) {
-        return $(el).children('li').each(__bind(function(i, el) {
+        return $el.children('li').each(__bind(function(i, el) {
           return $(el).width(this.settings.liWidths[i]);
         }, this));
       }
@@ -345,29 +346,29 @@
         return $(this).removeData('fillwidth.rows');
       });
     },
-    fillWidth: function(el) {
+    fillWidth: function($el) {
       var row, rows, _i, _j, _len, _len2, _ref;
-      $(el).trigger('fillwidth.beforeFillWidth');
+      $el.trigger('fillwidth.beforeFillWidth');
       if (this.settings.beforeFillWidth != null) {
         this.settings.beforeFillWidth();
       }
-      if ($(el).data('fillwidth.rows') != null) {
-        _ref = $(el).data('fillwidth.rows');
+      if ($el.data('fillwidth.rows') != null) {
+        _ref = $el.data('fillwidth.rows');
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           row = _ref[_i];
           row.reset();
         }
       }
-      $(el).width('auto');
-      $(el).trigger('fillwidth.beforeNewRows');
+      $el.width('auto');
+      $el.trigger('fillwidth.beforeNewRows');
       if (this.settings.beforeNewRows != null) {
         this.settings.beforeNewRows();
       }
-      this.frameWidth = $(el).width();
-      rows = methods.breakUpIntoRows.call(this, el);
-      $(el).data('fillwidth.rows', rows);
-      $(el).width(this.frameWidth);
-      $(el).trigger('fillwidth.afterNewRows');
+      this.frameWidth = $el.width();
+      rows = methods.breakUpIntoRows.call(this, $el);
+      $el.data('fillwidth.rows', rows);
+      $el.width(this.frameWidth);
+      $el.trigger('fillwidth.afterNewRows');
       if (this.settings.afterNewRows != null) {
         this.settings.afterNewRows();
       }
@@ -388,7 +389,7 @@
         row.lockHeight();
         row.updateDOM();
       }
-      $(el).trigger('fillwidth.afterFillWidth');
+      $el.trigger('fillwidth.afterFillWidth');
       if (this.settings.afterFillWidth != null) {
         return this.settings.afterFillWidth();
       }
@@ -426,16 +427,16 @@
       }
       return arr;
     },
-    breakUpIntoRows: function(el) {
+    breakUpIntoRows: function($el) {
       var i, rows;
       i = 0;
       rows = [new Row(this.frameWidth, this.settings)];
-      $(el).children('li').each(__bind(function(j, li) {
+      $el.children('li').each(__bind(function(j, li) {
         if ($(li).is(':hidden')) {
           return;
         }
         rows[i].lis.push(new Li(li, this.settings));
-        if (rows[i].width() >= $(el).width() && j !== $(el).children('li').length - 1) {
+        if (rows[i].width() >= $el.width() && j !== $el.children('li').length - 1) {
           rows.push(new Row(this.frameWidth, this.settings));
           return i++;
         }
