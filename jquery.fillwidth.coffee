@@ -21,9 +21,9 @@ class Li
 
   constructor: (el, settings) ->
     $el = $(el)
-    @originalWidth = @width = $el.outerWidth()
+    @originalWidth = @width = $el.outerWidth(false)
     @originalHeight = @height = $el.height()
-    @originalMargin = @margin = $el.outerWidth(true) - $el.outerWidth()
+    @originalMargin = @margin = $el.outerWidth(true) - $el.outerWidth(false)
     $img = $el.find('img')
     @imgRatio = $img.width() / $img.height()
     @$el = $el

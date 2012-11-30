@@ -8,9 +8,9 @@
     function Li(el, settings) {
       var $el, $img;
       $el = $(el);
-      this.originalWidth = this.width = $el.outerWidth();
+      this.originalWidth = this.width = $el.outerWidth(false);
       this.originalHeight = this.height = $el.height();
-      this.originalMargin = this.margin = $el.outerWidth(true) - $el.outerWidth();
+      this.originalMargin = this.margin = $el.outerWidth(true) - $el.outerWidth(false);
       $img = $el.find('img');
       this.imgRatio = $img.width() / $img.height();
       this.$el = $el;
