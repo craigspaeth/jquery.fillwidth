@@ -19,7 +19,3 @@ Simply copy and embed jquery.fillwidth.js into your project.
 ````
 cake build
 ````
-
-## Running Tests
-
-Open up `test/SpecRunner.html` in a browser

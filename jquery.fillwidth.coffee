@@ -20,13 +20,13 @@ callQueue = []
 class Li
 
   constructor: (el, settings) ->
-    @$el = $(el)
-    @originalWidth = @width = @$el.outerWidth(true)
-    @originalHeight = @height = @$el.height()
-    @originalMargin = @margin = @$el.outerWidth(true) - @$el.width()
-    $img = @$el.find('img')
+    $el = $(el)
+    @originalWidth = @width = $el.outerWidth()
+    @originalHeight = @height = $el.height()
+    @originalMargin = @margin = $el.outerWidth(true) - $el.outerWidth()
+    $img = $el.find('img')
     @imgRatio = $img.width() / $img.height()
-
+    @$el = $el
     @settings = settings
 
   setHeight: (h) ->
@@ -66,8 +66,7 @@ class Row
 
   width: ->
     width = 0
-    for li in @lis
-      width += (li.width + li.margin)
+    width += (li.width + li.margin) for li in @lis
     width
 
   updateDOM: ->
@@ -163,6 +162,7 @@ methods =
 
   # Called on initialization of the plugin
   init: (settings) ->
+
     # Settings
     _defaults =
       resizeLandscapesBy: 200
@@ -183,7 +183,10 @@ methods =
         methods.fillWidth.call @, $el
         # work around for iOS and IE8 continuous resize bug
         # Cause: in iOS changing document height triggers a resize event
-        unless navigator.userAgent.match(/iPhone/i) or navigator.userAgent.match(/iPad/i) or navigator.userAgent.match(/iPod/i) or ($.browser.msie and $.browser.version == "8.0")
+        unless navigator.userAgent.match(/iPhone/i) or 
+               navigator.userAgent.match(/iPad/i) or 
+               navigator.userAgent.match(/iPod/i) or
+               ($.browser.msie and $.browser.version == "8.0")
           $(window).bind 'resize.fillwidth', debounce (=>
             callQueue.push (=> methods.fillWidth.call @, $el)
             if callQueue.length is totalPlugins
@@ -205,19 +208,20 @@ methods =
 
   # Initial styling applied to the element to get lis to line up horizontally and images to be
   # contained well in them.
-  initStyling: ($el) ->
+  initStyling: (el) ->
+    $el = $ el
     $el.css
       'list-style': 'none'
-      padding     : 0
-      margin      : 0
-      overflow    : 'hidden'
+      padding: 0
+      margin: 0
+      overflow: 'hidden'
     $el.css @settings.initStyling if @settings.initStyling?
     $el.children('li').css
-      'float'       : 'left'
-      'margin-left' : 0
+      'float': 'left'
+      'margin-left': 0
     $el.find('*').css
-      'max-width'   : '100%'
-      'max-height'  : '100%'
+      'max-width': '100%'
+      'max-height': '100%'
 
     if @settings and @settings.liWidths?
       $el.children('li').each (i, el) =>
@@ -231,7 +235,8 @@ methods =
       $(@).removeData('fillwidth.rows')
 
   # Combines all of the magic and lines the lis up
-  fillWidth: ($el) ->
+  fillWidth: (el) ->
+    $el = $ el
     $el.trigger 'fillwidth.beforeFillWidth'
     @settings.beforeFillWidth() if @settings.beforeFillWidth?
 
@@ -286,7 +291,8 @@ methods =
   # Determine which set of lis go over the edge of the container, and store their
   # { width, height, el, etc.. } in an array. Storing the width and height in objects helps run
   # calculations without waiting for render reflows.
-  breakUpIntoRows: ($el) ->
+  breakUpIntoRows: (el) ->
+    $el = $ el
     i = 0
     rows = [new Row(@frameWidth, @settings)]
     $el.children('li').each (j, li) =>

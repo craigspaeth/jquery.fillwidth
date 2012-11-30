@@ -6,13 +6,14 @@
   callQueue = [];
   Li = (function() {
     function Li(el, settings) {
-      var $img;
-      this.$el = $(el);
-      this.originalWidth = this.width = this.$el.outerWidth(true);
-      this.originalHeight = this.height = this.$el.height();
-      this.originalMargin = this.margin = this.$el.outerWidth(true) - this.$el.width();
-      $img = this.$el.find('img');
+      var $el, $img;
+      $el = $(el);
+      this.originalWidth = this.width = $el.outerWidth();
+      this.originalHeight = this.height = $el.height();
+      this.originalMargin = this.margin = $el.outerWidth(true) - $el.outerWidth();
+      $img = $el.find('img');
       this.imgRatio = $img.width() / $img.height();
+      this.$el = $el;
       this.settings = settings;
     }
     Li.prototype.setHeight = function(h) {
@@ -310,7 +311,9 @@
         }
       }, this));
     },
-    initStyling: function($el) {
+    initStyling: function(el) {
+      var $el;
+      $el = $(el);
       $el.css({
         'list-style': 'none',
         padding: 0,
@@ -346,8 +349,9 @@
         return $(this).removeData('fillwidth.rows');
       });
     },
-    fillWidth: function($el) {
-      var row, rows, _i, _j, _len, _len2, _ref;
+    fillWidth: function(el) {
+      var $el, row, rows, _i, _j, _len, _len2, _ref;
+      $el = $(el);
       $el.trigger('fillwidth.beforeFillWidth');
       if (this.settings.beforeFillWidth != null) {
         this.settings.beforeFillWidth();
@@ -427,8 +431,9 @@
       }
       return arr;
     },
-    breakUpIntoRows: function($el) {
-      var i, rows;
+    breakUpIntoRows: function(el) {
+      var $el, i, rows;
+      $el = $(el);
       i = 0;
       rows = [new Row(this.frameWidth, this.settings)];
       $el.children('li').each(__bind(function(j, li) {
