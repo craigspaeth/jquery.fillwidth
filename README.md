@@ -63,7 +63,6 @@ $('#fill').fillwidth({
 Fillwidth is written in coffeescript and must therefore be compiled before contributing updates.
 
 * Install [node](https://github.com/joyent/node/wiki/Installation)
-* Install [npm](http://npmjs.org/) `curl http://npmjs.org/install.sh | sh`
 * Install [coffeescript](http://jashkenas.github.com/coffee-script/) `npm install coffee-script`
 
 ````
