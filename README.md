@@ -45,9 +45,18 @@ Fillwidth will try to subtly reduce the entire height of each row up to a certai
 
 Pass in a callback before fillwidth does it's magic and tries to line up images
 
-## afterFillWidth { Function }
+### afterFillWidth { Function }
 
 Pass in a callback right after fillwidth does it's magic and lines up images.
+
+````javascript
+$('#fill').fillwidth({
+  resizeLandscapesBy: 100,
+  resizeRowBy: 40,
+  beforeFillWidth: function() {},
+  afterFillWidth: function() {}
+})
+````
 
 ## To build
 
