@@ -23,12 +23,7 @@
       }
       kittens += "</ul>";
       $('body').append(kittens);
-      $('ul').fillwidth({
-        resizeLandscapesBy: 100,
-        imgTargetHeight: 200,
-        liWidths: liWidths,
-        resizeRowBy: 80
-      });
+      $('ul').fillwidth({ liWidths: liWidths });
       // $('img').css({opacity: 0}).load(function() { $(this).animate({opacity: 1})  })
     });
   </script>
