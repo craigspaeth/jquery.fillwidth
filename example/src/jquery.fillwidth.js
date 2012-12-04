@@ -257,7 +257,7 @@
       var i, _defaults;
       _defaults = {
         resizeLandscapesBy: 200,
-        resizeRowBy: 15,
+        resizeRowBy: 30,
         landscapeRatios: ((function() {
           var _results;
           _results = [];
