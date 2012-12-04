@@ -11,14 +11,14 @@
       // Generate a random ul of placekittens 
       //
       var kittens = "<ul>"
-        , liWidths = [];
+        , liWidths = []
+        , height =  200;
       for(var i = 0; i < 20; i++) {
         randWidth = Math.ceil(50 + (Math.random() * 600));
-        height =  200
+        liWidths.push(randWidth);
         kittens += "<li>"
                 + "<img src='http://placekitten.com/" + randWidth + "/" + height + "'>"
                 + "</li>";
-        liWidths.push(randWidth);
       }
       kittens += "</ul>";
       $('body').append(kittens);
