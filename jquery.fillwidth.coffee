@@ -166,7 +166,7 @@ methods =
     # Settings
     _defaults =
       resizeLandscapesBy: 200
-      resizeRowBy: 15
+      resizeRowBy: 30
       landscapeRatios: (i / 10 for i in [10..50] by 3).reverse()
       fillLastRow: false
       beforeFillWidth: null

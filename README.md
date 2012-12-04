@@ -35,7 +35,7 @@ Fillwidth will try to reduce images that are landscape (longer in width than hei
 
 ![Landscape Reduce Example](http://cl.ly/image/061J3y1g2C2U/Image%202012.12.03%203:27:57%20PM.png)
 
-### resizeRowBy { Number } (default 15)
+### resizeRowBy { Number } (default 30)
 
 Fillwidth will try to subtly reduce the entire height of each row up to a certain amount of pixels. Change this number to adjust the maximum amount of pixels fillwidth is allowed to reduce each row by.
 
@@ -57,6 +57,10 @@ $('#fill').fillwidth({
   afterFillWidth: function() {}
 })
 ````
+
+### liWidths { Array }
+
+If you know the widths of the child images before they finish loading, pass in an array of the widths to avoid initial flickering. See the [example](https://github.com/craigspaeth/jquery.fillwidth/blob/master/example/index.html) for how this is done.
 
 ## To build
 
