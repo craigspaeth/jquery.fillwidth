@@ -3,73 +3,42 @@
 <html>
 <head>
   <title>Example</title>
-  <script type="text/javascript" src="src/jquery.min.js"></script>
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
   <script type="text/javascript" src="src/jquery.fillwidth.js"></script>
   <script>
     $(function(){
-      var kittens = "<ul>";
-      var liWidths = [];
+      // 
+      // Generate a random ul of placekittens 
+      //
+      var kittens = "<ul>"
+        , liWidths = []
+        , height =  200;
       for(var i = 0; i < 20; i++) {
         randWidth = Math.ceil(50 + (Math.random() * 600));
-        height =  200
-        kittens += "<li>"
-                + "<div class='img_container'>"
-                + "<img src='http://placekitten.com/" + randWidth + "/"
-                + height + "'>"
-                + "</div>"
-                // + "<p>Pablo Picasso</p><p>The Most Beautiful Cat in the entire world</p>"
-                + "</li>";
         liWidths.push(randWidth);
+        kittens += "<li>"
+                + "<img src='http://placekitten.com/" + randWidth + "/" + height + "'>"
+                + "</li>";
       }
       kittens += "</ul>";
       $('body').append(kittens);
-      $('ul').fillwidth({
-        resizeLandscapesBy: 100,
-        imgTargetHeight: 200,
-        liWidths: liWidths,
-        resizeRowBy: 80
-      });
-      // $('img').css({opacity: 0}).load(function() { $(this).animate({opacity: 1})  })
+      
+      // 
+      // Apply fillwidth passing in the widths stored above to avoid initial flickering.
+      // 
+      $('ul').fillwidth({ liWidths: liWidths });
     });
   </script>
   <style>
-    ul {
-      border: 1px solid #ccc;
-    }
     li {
       margin: 0 15px 15px 0;
-      font-size: 13px;
-      line-height: 13px;
-      font-family: georgia;
     }
-    .img_container {
+    img {
       height: 200px;
     }
-  </style
+  </style>
 </head>
 
 <body>
-  <!--
-  <ul>
-    <li><img src='kittens/1.jpeg'></li>
-    <li><img src='kittens/2.jpeg'></li>
-    <li><img src='kittens/3.jpeg'></li>
-    <li><img src='kittens/4.jpeg'></li>
-    <li><img src='kittens/5.jpeg'></li>
-    <li><img src='kittens/6.jpeg'></li>
-    <li><img src='kittens/7.jpeg'></li>
-    <li><img src='kittens/8.jpeg'></li>
-  </ul>
-  <ul id='no_landscapes'>
-    <li><img src='no_landscape_kittens/1.jpg'></li>
-    <li><img src='no_landscape_kittens/2.jpg'></li>
-    <li><img src='no_landscape_kittens/3.jpg'></li>
-    <li><img src='no_landscape_kittens/4.jpg'></li>
-    <li><img src='no_landscape_kittens/5.jpg'></li>
-    <li><img src='no_landscape_kittens/6.jpg'></li>
-    <li><img src='no_landscape_kittens/7.jpg'></li>
-    <li><img src='no_landscape_kittens/8.jpg'></li>
-  </ul>
-  -->
 </body>
 </html>
