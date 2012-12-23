@@ -1,10 +1,14 @@
 (function() {
   var $, Li, Row, callQueue, debounce, methods, totalPlugins;
-  var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
   $ = jQuery;
+
   totalPlugins = 0;
+
   callQueue = [];
+
   Li = (function() {
+
     function Li(el, settings) {
       var $el, $img;
       $el = $(el);
@@ -16,53 +20,66 @@
       this.$el = $el;
       this.settings = settings;
     }
+
     Li.prototype.setHeight = function(h) {
-      this.width = h * (this.width / this.height);
+      this.width = Math.round(h * (this.width / this.height));
       if (!this.settings.lockedHeight) {
         return this.height = h;
       }
     };
+
     Li.prototype.setWidth = function(w) {
-      this.height = w * (this.height / this.width);
+      this.height = Math.round(w * (this.height / this.width));
       return this.width = w;
     };
+
     Li.prototype.decWidth = function() {
       return this.setWidth(this.width - 1);
     };
+
     Li.prototype.decHeight = function() {
       return this.setHeight(this.height - 1);
     };
+
     Li.prototype.incWidth = function() {
       return this.setWidth(this.width + 1);
     };
+
     Li.prototype.incHeight = function() {
       return this.setHeight(this.height + 1);
     };
+
     Li.prototype.updateDOM = function() {
-      this.$el.width(this.width);
-      this.$el.height(this.height);
       return this.$el.css({
+        width: this.width,
+        height: this.height,
         'margin-right': this.margin
       });
     };
+
     Li.prototype.reset = function() {
       this.width = this.originalWidth;
       this.height = this.originalHeight;
       this.margin = this.originalMargin;
       return this.$el.css({
-        "margin-right": this.originalMargin,
-        width: this.originalWidth,
-        height: this.height
+        width: this.width,
+        height: this.height,
+        'margin-right': this.margin
       });
     };
+
     return Li;
+
   })();
+
   Row = (function() {
+
     function Row(frameWidth, settings) {
       this.frameWidth = frameWidth;
       this.settings = settings;
       this.lis = [];
     }
+
     Row.prototype.width = function() {
       var li, width, _i, _len, _ref;
       width = 0;
@@ -73,6 +90,7 @@
       }
       return width;
     };
+
     Row.prototype.updateDOM = function() {
       var li, _i, _len, _ref, _results;
       _ref = this.lis;
@@ -83,6 +101,7 @@
       }
       return _results;
     };
+
     Row.prototype.reset = function() {
       var li, _i, _len, _ref, _results;
       _ref = this.lis;
@@ -93,6 +112,7 @@
       }
       return _results;
     };
+
     Row.prototype.landscapeGroups = function() {
       var i, landscapeGroups, landscapes, li, ratio, _ref;
       landscapeGroups = [];
@@ -100,11 +120,11 @@
       for (i in _ref) {
         ratio = _ref[i];
         landscapes = (function() {
-          var _i, _len, _ref2, _results;
-          _ref2 = this.lis;
+          var _i, _len, _ref1, _results;
+          _ref1 = this.lis;
           _results = [];
-          for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-            li = _ref2[_i];
+          for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+            li = _ref1[_i];
             if (li.imgRatio >= ratio) {
               _results.push(li);
             }
@@ -115,36 +135,20 @@
       }
       return landscapeGroups;
     };
+
     Row.prototype.resizeLandscapes = function() {
-      var i, landscapes, li, _i, _j, _len, _len2, _ref, _ref2;
+      var i, landscapes, li, _i, _j, _k, _len, _len1, _ref, _ref1;
       _ref = this.landscapeGroups(this.settings.landscapeRatios);
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         landscapes = _ref[_i];
-        if (landscapes.length !== 0) {
-          for (i = 0, _ref2 = this.settings.resizeLandscapesBy; 0 <= _ref2 ? i <= _ref2 : i >= _ref2; 0 <= _ref2 ? i++ : i--) {
-            for (_j = 0, _len2 = landscapes.length; _j < _len2; _j++) {
-              li = landscapes[_j];
-              li.decHeight();
-            }
-            if (this.width() <= this.frameWidth) {
-              break;
-            }
-          }
-          if (this.width() <= this.frameWidth) {
-            break;
-          }
+        if (!(landscapes.length !== 0)) {
+          continue;
         }
-      }
-      return this;
-    };
-    Row.prototype.adjustMargins = function() {
-      var i, li, _i, _len, _ref, _ref2, _results;
-      _results = [];
-      for (i = 0, _ref = this.settings.adjustMarginsBy; 0 <= _ref ? i <= _ref : i >= _ref; 0 <= _ref ? i++ : i--) {
-        _ref2 = this.lis.slice(0, (this.lis.length - 2 + 1) || 9e9);
-        for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-          li = _ref2[_i];
-          li.margin--;
+        for (i = _j = 0, _ref1 = this.settings.resizeLandscapesBy; 0 <= _ref1 ? _j <= _ref1 : _j >= _ref1; i = 0 <= _ref1 ? ++_j : --_j) {
+          for (_k = 0, _len1 = landscapes.length; _k < _len1; _k++) {
+            li = landscapes[_k];
+            li.decHeight();
+          }
           if (this.width() <= this.frameWidth) {
             break;
           }
@@ -153,8 +157,30 @@
           break;
         }
       }
+      return this;
+    };
+
+    Row.prototype.adjustMargins = function() {
+      var i, li, _i, _j, _len, _ref, _ref1, _results;
+      _results = [];
+      for (i = _i = 0, _ref = this.settings.adjustMarginsBy; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
+        _ref1 = this.lis.slice(0, +(this.lis.length - 2) + 1 || 9e9);
+        for (_j = 0, _len = _ref1.length; _j < _len; _j++) {
+          li = _ref1[_j];
+          li.margin--;
+          if (this.width() <= this.frameWidth) {
+            break;
+          }
+        }
+        if (this.width() <= this.frameWidth) {
+          break;
+        } else {
+          _results.push(void 0);
+        }
+      }
       return _results;
     };
+
     Row.prototype.resizeHeight = function() {
       var i, li, _results;
       i = 0;
@@ -162,18 +188,19 @@
       while (this.width() > this.frameWidth && i < this.settings.resizeRowBy) {
         i++;
         _results.push((function() {
-          var _i, _len, _ref, _results2;
+          var _i, _len, _ref, _results1;
           _ref = this.lis;
-          _results2 = [];
+          _results1 = [];
           for (_i = 0, _len = _ref.length; _i < _len; _i++) {
             li = _ref[_i];
-            _results2.push(li.decHeight());
+            _results1.push(li.decHeight());
           }
-          return _results2;
+          return _results1;
         }).call(this));
       }
       return _results;
     };
+
     Row.prototype.roundOff = function() {
       var li, _i, _len, _ref, _results;
       _ref = this.lis;
@@ -184,24 +211,32 @@
       }
       return _results;
     };
+
     Row.prototype.fillLeftoverPixels = function() {
-      var diff, randIndex, _results;
+      var diff, randIndex, _results,
+        _this = this;
       this.roundOff();
-      diff = __bind(function() {
-        return this.frameWidth - this.width();
-      }, this);
+      diff = function() {
+        return _this.frameWidth - _this.width();
+      };
       _results = [];
       while (diff() !== 0) {
         randIndex = Math.round(Math.random() * (this.lis.length - 1));
-        _results.push(diff() < 0 ? this.lis[randIndex].decWidth() : this.lis[randIndex].incWidth());
+        if (diff() < 0) {
+          _results.push(this.lis[randIndex].decWidth());
+        } else {
+          _results.push(this.lis[randIndex].incWidth());
+        }
       }
       return _results;
     };
+
     Row.prototype.removeMargin = function() {
       var lastLi;
       lastLi = this.lis[this.lis.length - 1];
       return lastLi.margin = 0;
     };
+
     Row.prototype.lockHeight = function() {
       var li, tallestHeight, tallestLi, _i, _len, _ref, _results;
       tallestLi = (this.lis.sort(function(a, b) {
@@ -216,6 +251,7 @@
       }
       return _results;
     };
+
     Row.prototype.hide = function() {
       var li, _i, _len, _ref, _results;
       _ref = this.lis;
@@ -226,6 +262,7 @@
       }
       return _results;
     };
+
     Row.prototype.show = function() {
       var li, _i, _len, _ref, _results;
       _ref = this.lis;
@@ -236,32 +273,38 @@
       }
       return _results;
     };
+
     return Row;
+
   })();
+
   debounce = function(func, wait) {
     var timeout;
     timeout = 0;
     return function() {
-      var args, throttler;
+      var args, throttler,
+        _this = this;
       args = arguments;
-      throttler = __bind(function() {
+      throttler = function() {
         timeout = null;
         return func(args);
-      }, this);
+      };
       clearTimeout(timeout);
       return timeout = setTimeout(throttler, wait);
     };
   };
+
   methods = {
     init: function(settings) {
-      var i, _defaults;
+      var i, _defaults,
+        _this = this;
       _defaults = {
         resizeLandscapesBy: 200,
         resizeRowBy: 30,
         landscapeRatios: ((function() {
-          var _results;
+          var _i, _results;
           _results = [];
-          for (i = 10; i <= 50; i += 3) {
+          for (i = _i = 10; _i <= 50; i = _i += 3) {
             _results.push(i / 10);
           }
           return _results;
@@ -271,18 +314,18 @@
         afterFillWidth: null
       };
       this.settings = $.extend(_defaults, settings);
-      return this.each(__bind(function(i, el) {
+      return this.each(function(i, el) {
         var $el, $imgs, imagesToLoad, initFillWidth;
         $el = $(el);
-        methods.initStyling.call(this, $el);
-        initFillWidth = __bind(function() {
-          methods.fillWidth.call(this, $el);
+        methods.initStyling.call(_this, $el);
+        initFillWidth = function() {
+          methods.fillWidth.call(_this, $el);
           if (!(navigator.userAgent.match(/iPhone/i) || navigator.userAgent.match(/iPad/i) || navigator.userAgent.match(/iPod/i) || ($.browser.msie && $.browser.version === "8.0"))) {
-            $(window).bind('resize.fillwidth', debounce((__bind(function() {
+            $(window).bind('resize.fillwidth', debounce((function() {
               var fn, _i, _len;
-              callQueue.push((__bind(function() {
-                return methods.fillWidth.call(this, $el);
-              }, this)));
+              callQueue.push((function() {
+                return methods.fillWidth.call(_this, $el);
+              }));
               if (callQueue.length === totalPlugins) {
                 for (_i = 0, _len = callQueue.length; _i < _len; _i++) {
                   fn = callQueue[_i];
@@ -290,12 +333,12 @@
                 }
                 return callQueue = [];
               }
-            }, this)), 300));
+            }), 300));
           }
           return totalPlugins++;
-        }, this);
+        };
         $imgs = $el.find('img');
-        if (this.settings.liWidths != null) {
+        if (_this.settings.liWidths != null) {
           initFillWidth();
           return $imgs.load(function() {
             return $(this).height('auto');
@@ -309,10 +352,11 @@
             }
           });
         }
-      }, this));
+      });
     },
     initStyling: function(el) {
-      var $el;
+      var $el,
+        _this = this;
       $el = $(el);
       $el.css({
         'list-style': 'none',
@@ -332,9 +376,9 @@
         'max-height': '100%'
       });
       if (this.settings && (this.settings.liWidths != null)) {
-        return $el.children('li').each(__bind(function(i, el) {
-          return $(el).width(this.settings.liWidths[i]);
-        }, this));
+        return $el.children('li').each(function(i, el) {
+          return $(el).width(_this.settings.liWidths[i]);
+        });
       }
     },
     destroy: function() {
@@ -350,14 +394,14 @@
       });
     },
     fillWidth: function(el) {
-      var $el, row, rows, _i, _j, _len, _len2, _ref;
+      var $el, row, rows, _i, _j, _len, _len1, _ref;
       $el = $(el);
       $el.trigger('fillwidth.beforeFillWidth');
       if (this.settings.beforeFillWidth != null) {
         this.settings.beforeFillWidth();
       }
-      if ($el.data('fillwidth.rows') != null) {
-        _ref = $el.data('fillwidth.rows');
+      if (this.fillwidthRows) {
+        _ref = this.fillwidthRows;
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           row = _ref[_i];
           row.reset();
@@ -370,13 +414,13 @@
       }
       this.frameWidth = $el.width();
       rows = methods.breakUpIntoRows.call(this, $el);
-      $el.data('fillwidth.rows', rows);
+      this.fillwidthRows = rows;
       $el.width(this.frameWidth);
       $el.trigger('fillwidth.afterNewRows');
       if (this.settings.afterNewRows != null) {
         this.settings.afterNewRows();
       }
-      for (_j = 0, _len2 = rows.length; _j < _len2; _j++) {
+      for (_j = 0, _len1 = rows.length; _j < _len1; _j++) {
         row = rows[_j];
         if (!(row.lis.length > 1)) {
           continue;
@@ -399,10 +443,11 @@
       }
     },
     rowObjs: function() {
-      var arr;
+      var arr, rows;
       arr = [];
+      rows = this.fillwidthRows;
       this.each(function() {
-        return arr.push($(this).data('fillwidth.rows'));
+        return arr.push(rows);
       });
       if (arr.length === 1) {
         arr = arr[0];
@@ -416,10 +461,10 @@
       for (_i = 0, _len = rows.length; _i < _len; _i++) {
         row = rows[_i];
         arr.push((function() {
-          var _j, _len2, _ref, _results;
+          var _j, _len1, _ref, _results;
           _ref = row.lis;
           _results = [];
-          for (_j = 0, _len2 = _ref.length; _j < _len2; _j++) {
+          for (_j = 0, _len1 = _ref.length; _j < _len1; _j++) {
             li = _ref[_j];
             _results.push(li.$el);
           }
@@ -432,23 +477,25 @@
       return arr;
     },
     breakUpIntoRows: function(el) {
-      var $el, i, rows;
+      var $el, i, rows,
+        _this = this;
       $el = $(el);
       i = 0;
       rows = [new Row(this.frameWidth, this.settings)];
-      $el.children('li').each(__bind(function(j, li) {
+      $el.children('li').each(function(j, li) {
         if ($(li).is(':hidden')) {
           return;
         }
-        rows[i].lis.push(new Li(li, this.settings));
+        rows[i].lis.push(new Li(li, _this.settings));
         if (rows[i].width() >= $el.width() && j !== $el.children('li').length - 1) {
-          rows.push(new Row(this.frameWidth, this.settings));
+          rows.push(new Row(_this.frameWidth, _this.settings));
           return i++;
         }
-      }, this));
+      });
       return rows;
     }
   };
+
   $.fn.fillwidth = function(method) {
     if (methods[method] != null) {
       return methods[method].apply(this, Array.prototype.slice.call(arguments, 1));
@@ -458,4 +505,5 @@
       return $.error("Method " + method + " does not exist on jQuery.fillwidth");
     }
   };
+
 }).call(this);

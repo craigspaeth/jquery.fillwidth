@@ -30,11 +30,11 @@ class Li
     @settings = settings
 
   setHeight: (h) ->
-    @width = h * (@width / @height)
+    @width = Math.round(h * (@width / @height))
     @height = h unless @settings.lockedHeight # comment if locked height
 
   setWidth: (w) ->
-    @height = w * (@height / @width)
+    @height = Math.round(w * (@height / @width))
     @width = w
 
   decWidth: -> @setWidth @width - 1
@@ -46,18 +46,19 @@ class Li
   incHeight: -> @setHeight @height + 1
 
   updateDOM: ->
-    @$el.width @width
-    @$el.height @height
-    @$el.css 'margin-right': @margin
+    @$el.css
+      width          : @width
+      height         : @height
+      'margin-right' : @margin
 
   reset: ->
     @width = @originalWidth
     @height = @originalHeight
     @margin = @originalMargin
     @$el.css
-      "margin-right": @originalMargin
-      width: @originalWidth
-      height: @height
+      width          : @width
+      height         : @height
+      'margin-right' : @margin
 
 class Row
 
@@ -183,8 +184,8 @@ methods =
         methods.fillWidth.call @, $el
         # work around for iOS and IE8 continuous resize bug
         # Cause: in iOS changing document height triggers a resize event
-        unless navigator.userAgent.match(/iPhone/i) or 
-               navigator.userAgent.match(/iPad/i) or 
+        unless navigator.userAgent.match(/iPhone/i) or
+               navigator.userAgent.match(/iPad/i) or
                navigator.userAgent.match(/iPod/i) or
                ($.browser.msie and $.browser.version == "8.0")
           $(window).bind 'resize.fillwidth', debounce (=>
@@ -219,6 +220,7 @@ methods =
     $el.children('li').css
       'float': 'left'
       'margin-left': 0
+
     $el.find('*').css
       'max-width': '100%'
       'max-height': '100%'
@@ -241,8 +243,8 @@ methods =
     @settings.beforeFillWidth() if @settings.beforeFillWidth?
 
     # Reset the list items & unfreeze the container
-    if $el.data('fillwidth.rows')?
-      row.reset() for row in $el.data 'fillwidth.rows'
+    if @fillwidthRows
+      row.reset() for row in @fillwidthRows #$el.data 'fillwidth.rows'
     $el.width 'auto'
 
     $el.trigger 'fillwidth.beforeNewRows'
@@ -251,7 +253,7 @@ methods =
     # Store the new row in-memory objects and re-freeze the container
     @frameWidth = $el.width()
     rows = methods.breakUpIntoRows.call @, $el
-    $el.data 'fillwidth.rows', rows
+    @fillwidthRows = rows
     $el.width @frameWidth
 
     $el.trigger 'fillwidth.afterNewRows'
@@ -274,8 +276,9 @@ methods =
   # Returns the current in-memory row objects
   rowObjs: ->
     arr = []
+    rows = @fillwidthRows
     @each ->
-      arr.push $(@).data 'fillwidth.rows'
+      arr.push rows
     arr = arr[0] if arr.length is 1
     arr
 
