@@ -5,7 +5,7 @@ so that everything fits inside their container nice and flush to the edges. Used
 
 ![Example Art.sy Screenshot](http://cl.ly/image/2r2m3Z310O2u/fill_width.jpg) 
 
-See the [example](http://htmlpreview.github.com/?https://github.com/craigspaeth/jquery.fillwidth/blob/master/example/index.html) using [placekitten.com](http://placekitten.com/) for a basic implementation.
+See [the example](http://htmlpreview.github.com/?https://github.com/craigspaeth/jquery.fillwidth/blob/master/example/index.html) using [placekitten.com](http://placekitten.com/) for a basic implementation.
 
 ## Usage
 
