@@ -1,11 +1,11 @@
 # jquery.fillwidth
 
 A jQuery plugin that given a `ul` with images inside their `lis` will do some things to line them up
-so that everything fits inside their container nice and flush to the edges. Used throughout [Art.sy](http://art.sy) to make rows of images fit inside a fluid container and still stay flush without cropping the images.
+so that everything fits inside their container nice and flush to the edges. Used throughout [Artsy](http://artsy.net) to make rows of images fit inside a fluid container and still stay flush without cropping the images.
 
-![Example Art.sy Screenshot](http://cl.ly/image/2r2m3Z310O2u/fill_width.jpg) 
+![Example Artsy Screenshot](screenshots/fill_width.jpg)
 
-See [the example](http://htmlpreview.github.com/?https://github.com/craigspaeth/jquery.fillwidth/blob/master/example/index.html) using [placekitten.com](http://placekitten.com/) for a basic implementation.
+See [this example](http://craigspaeth.github.io/jquery.fillwidth/example) using [placekitten.com](http://placekitten.com/) for a basic implementation.
 
 ## Usage
 
@@ -73,3 +73,7 @@ Fillwidth is written in coffeescript and must therefore be compiled before contr
 ````
 cake build
 ````
+
+## License
+
+MIT, see [LICENSE](LICENSE.md).
