@@ -1,0 +1,7 @@
+{
+  "name": "jquery.fillwidth",
+  "version": "0.0.1",
+  "scripts": {
+    "main": "jquery.fillwidth.js"
+  }
+}
