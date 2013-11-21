@@ -187,7 +187,7 @@ methods =
         unless navigator.userAgent.match(/iPhone/i) or
                navigator.userAgent.match(/iPad/i) or
                navigator.userAgent.match(/iPod/i) or
-               ($.browser.msie and $.browser.version == "8.0")
+               navigator.userAgent.match(/MSIE 8\.0/i)
           $(window).bind 'resize.fillwidth', debounce (=>
             callQueue.push (=> methods.fillWidth.call @, $el)
             if callQueue.length is totalPlugins
