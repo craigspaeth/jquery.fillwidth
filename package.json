@@ -1,7 +1,7 @@
 {
   "name": "jquery.fillwidth",
-  "version": "0.0.3",
-  "devDependencies": {
+  "version": "0.0.4",
+  "dependencies": {
     "coffee-script": "*"
   }
 }
