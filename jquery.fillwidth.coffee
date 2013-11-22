@@ -50,6 +50,7 @@ class Li
       width          : @width
       height         : @height
       'margin-right' : @margin
+    @$el.find('img').height 'auto'
 
   reset: ->
     @width = @originalWidth
@@ -200,7 +201,6 @@ methods =
 
       if @settings.imageDimensions?
         initFillWidth()
-        $imgs.load -> $(@).height('auto')
       else
         imagesToLoad = $imgs.length
         $imgs.load ->

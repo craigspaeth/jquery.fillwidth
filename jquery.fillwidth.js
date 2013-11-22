@@ -49,11 +49,12 @@
     };
 
     Li.prototype.updateDOM = function() {
-      return this.$el.css({
+      this.$el.css({
         width: this.width,
         height: this.height,
         'margin-right': this.margin
       });
+      return this.$el.find('img').height('auto');
     };
 
     Li.prototype.reset = function() {
@@ -337,10 +338,7 @@
         };
         $imgs = $el.find('img');
         if (_this.settings.imageDimensions != null) {
-          initFillWidth();
-          return $imgs.load(function() {
-            return $(this).height('auto');
-          });
+          return initFillWidth();
         } else {
           imagesToLoad = $imgs.length;
           return $imgs.load(function() {
