@@ -198,7 +198,7 @@ methods =
 
       $imgs = $el.find('img')
 
-      if @settings.liWidths?
+      if @settings.imageDimensions?
         initFillWidth()
         $imgs.load -> $(@).height('auto')
       else
@@ -225,9 +225,12 @@ methods =
       'max-width': '100%'
       'max-height': '100%'
 
-    if @settings and @settings.liWidths?
+    # Set the initial width and height of the lis if passed in
+    if @settings and @settings.imageDimensions?
       $el.children('li').each (i, el) =>
-        $(el).width @settings.liWidths[i]
+        $img = $(el).find('img').first()
+        $img.width @settings.imageDimensions[i].width
+        $img.height @settings.imageDimensions[i].height
 
   # Removes the fillwidth functionality completely. Returns the element back to it's state
   destroy: ->

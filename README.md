@@ -49,9 +49,9 @@ Pass in a callback before fillwidth does it's magic and tries to line up images
 
 Pass in a callback right after fillwidth does it's magic and lines up images.
 
-### liWidths { Array }
+### imageDimensions { Array }
 
-If you know the widths of the child images before they finish loading, pass in an array of the widths to avoid initial flickering. See the [example](https://github.com/craigspaeth/jquery.fillwidth/blob/master/example/index.html) for how this is done.
+If you know the dimensions of the child images before they finish loading, pass in an array of `{ width: X, height: X }` hashes for a more quicker fillwidth that calculates before the images finish loading. See the [example](https://github.com/craigspaeth/jquery.fillwidth/blob/master/example/index.html) for how this is done.
 
 ````javascript
 $('#fill').fillwidth({
@@ -59,7 +59,7 @@ $('#fill').fillwidth({
   resizeRowBy: 40,
   beforeFillWidth: function() {},
   afterFillWidth: function() {},
-  liWidths: [100, 120, 150, 105]
+  imageDimensions: [{ width: 100, height: 120 }]
 })
 ````
 

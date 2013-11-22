@@ -336,7 +336,7 @@
           return totalPlugins++;
         };
         $imgs = $el.find('img');
-        if (_this.settings.liWidths != null) {
+        if (_this.settings.imageDimensions != null) {
           initFillWidth();
           return $imgs.load(function() {
             return $(this).height('auto');
@@ -373,9 +373,12 @@
         'max-width': '100%',
         'max-height': '100%'
       });
-      if (this.settings && (this.settings.liWidths != null)) {
+      if (this.settings && (this.settings.imageDimensions != null)) {
         return $el.children('li').each(function(i, el) {
-          return $(el).width(_this.settings.liWidths[i]);
+          var $img;
+          $img = $(el).find('img').first();
+          $img.width(_this.settings.imageDimensions[i].width);
+          return $img.height(_this.settings.imageDimensions[i].height);
         });
       }
     },
