@@ -8,7 +8,6 @@
   callQueue = [];
 
   Li = (function() {
-
     function Li(el, settings) {
       var $el, $img;
       $el = $(el);
@@ -73,7 +72,6 @@
   })();
 
   Row = (function() {
-
     function Row(frameWidth, settings) {
       this.frameWidth = frameWidth;
       this.settings = settings;
@@ -320,7 +318,7 @@
         methods.initStyling.call(_this, $el);
         initFillWidth = function() {
           methods.fillWidth.call(_this, $el);
-          if (!(navigator.userAgent.match(/iPhone/i) || navigator.userAgent.match(/iPad/i) || navigator.userAgent.match(/iPod/i) || ($.browser.msie && $.browser.version === "8.0"))) {
+          if (!(navigator.userAgent.match(/iPhone/i) || navigator.userAgent.match(/iPad/i) || navigator.userAgent.match(/iPod/i) || navigator.userAgent.match(/MSIE 8\.0/i))) {
             $(window).bind('resize.fillwidth', debounce((function() {
               var fn, _i, _len;
               callQueue.push((function() {
@@ -338,7 +336,7 @@
           return totalPlugins++;
         };
         $imgs = $el.find('img');
-        if (_this.settings.liWidths != null) {
+        if (_this.settings.imageDimensions != null) {
           initFillWidth();
           return $imgs.load(function() {
             return $(this).height('auto');
@@ -375,9 +373,12 @@
         'max-width': '100%',
         'max-height': '100%'
       });
-      if (this.settings && (this.settings.liWidths != null)) {
+      if (this.settings && (this.settings.imageDimensions != null)) {
         return $el.children('li').each(function(i, el) {
-          return $(el).width(_this.settings.liWidths[i]);
+          var $img;
+          $img = $(el).find('img').first();
+          $img.width(_this.settings.imageDimensions[i].width);
+          return $img.height(_this.settings.imageDimensions[i].height);
         });
       }
     },
@@ -499,7 +500,7 @@
   $.fn.fillwidth = function(method) {
     if (methods[method] != null) {
       return methods[method].apply(this, Array.prototype.slice.call(arguments, 1));
-    } else if (typeof method === "object" || !(method != null)) {
+    } else if (typeof method === "object" || (method == null)) {
       return methods.init.apply(this, arguments);
     } else {
       return $.error("Method " + method + " does not exist on jQuery.fillwidth");
