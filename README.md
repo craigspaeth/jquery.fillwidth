@@ -51,7 +51,7 @@ Pass in a callback right after fillwidth does it's magic and lines up images.
 
 ### imageDimensions { Array }
 
-If you know the dimensions of the child images before they finish loading, pass in an array of `{ width: X, height: X }` hashes for a more quicker fillwidth that calculates before the images finish loading. See the [example](https://github.com/craigspaeth/jquery.fillwidth/blob/master/example/index.html) for how this is done.
+If you know the dimensions of the child images before they finish loading, pass in an array of `{ width: X, height: X }` hashes for a quicker fillwidth that calculates before the images finish loading. See the [example](https://github.com/craigspaeth/jquery.fillwidth/blob/master/example/index.html) for how this is done.
 
 ````javascript
 $('#fill').fillwidth({
