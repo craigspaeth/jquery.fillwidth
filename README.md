@@ -71,7 +71,7 @@ Fillwidth is written in coffeescript and must therefore be compiled before contr
 * Install [coffeescript](http://jashkenas.github.com/coffee-script/) `npm install coffee-script`
 
 ````
-cake build
+make build
 ````
 
 ## License
