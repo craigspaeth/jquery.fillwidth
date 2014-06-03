@@ -215,7 +215,6 @@ methods =
       'list-style': 'none'
       padding: 0
       margin: 0
-      overflow: 'hidden'
     $el.css @settings.initStyling if @settings.initStyling?
     $el.find('> li').css
       'float': 'left'

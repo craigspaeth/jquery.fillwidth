@@ -360,8 +360,7 @@
       $el.css({
         'list-style': 'none',
         padding: 0,
-        margin: 0,
-        overflow: 'hidden'
+        margin: 0
       });
       if (this.settings.initStyling != null) {
         $el.css(this.settings.initStyling);
