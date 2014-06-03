@@ -1,6 +1,6 @@
 {
   "name": "jquery.fillwidth",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "devDependencies": {
     "coffee-script": "*",
     "uglify-js": "*"
